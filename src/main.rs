@@ -13,7 +13,7 @@ async fn main() {
     let (provider, api) = spawn_rpc().await;
     system_shutdown(provider, &api).await;
 
-    let mut fork = api.get_fork().unwrap();
+    /*let mut fork = api.get_fork().unwrap();
     fork.reset(
         Some(env::var("ETH_RPC_URL").expect("ETH_RPC_URL not found in .env")),
         BlockId::Number(14445961.into()),
@@ -21,7 +21,7 @@ async fn main() {
     .await
     .unwrap();
     fork.storage_write().clear();
-    println!("Fork cache cleared");
+    println!("Fork cache cleared");*/
 }
 
 async fn spawn_rpc() -> (Arc<Provider<Ipc>>, EthApi) {
@@ -60,12 +60,24 @@ async fn system_shutdown(provider: Arc<Provider<Ipc>>, api: &EthApi) {
         nonce: Some(nonce),
         gas: Some(28_000_000u64.into()),
         data: Some(shutdown),
-        chain_id: None,
+        chain_id: Some(1.into()),
     };
 
     let start = Instant::now();
-    api.send_transaction(tx.into()).await.unwrap();
+    api.send_transaction(tx.clone().into()).await.unwrap();
+    let duration = start.elapsed();
+    println!("Transaction took: {:?}", duration);
+
+    let start = Instant::now();
+    api.call(
+        tx.into(),
+        Some(BlockId::Number(14445961.into())),
+        None,
+    ).await.unwrap();
+
     let duration = start.elapsed();
 
-    println!("Transaction took: {:?}", duration);
+    println!("Call took: {:?}", duration);
+
+
 }
