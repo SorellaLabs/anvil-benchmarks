@@ -1,0 +1,22 @@
+[package]
+name = "anvil-benchmarks"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+eyre = {version = "0.6.5"}
+ethers = {version = "2.0.4", features = ["ipc"]}
+
+
+
+[dependencies]
+anvil = {git = "https://github.com/SorellaLabs/fastfoundry.git"}
+ethers = {version = "2.0.4", features = ["ipc"]}
+serde = {version = "1.0.163"}
+tokio = {version = "1.13.0", features = ["full"]}
