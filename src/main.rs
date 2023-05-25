@@ -13,7 +13,7 @@ async fn main() {
     let (provider, api) = spawn_rpc().await;
     system_shutdown(provider, &api).await;
 
-    /*let mut fork = api.get_fork().unwrap();
+    let mut fork = api.get_fork().unwrap();
     fork.reset(
         Some(env::var("ETH_RPC_URL").expect("ETH_RPC_URL not found in .env")),
         BlockId::Number(14445961.into()),
@@ -21,7 +21,7 @@ async fn main() {
     .await
     .unwrap();
     fork.storage_write().clear();
-    println!("Fork cache cleared");*/
+    println!("Fork cache cleared");    
 }
 
 async fn spawn_rpc() -> (Arc<Provider<Ipc>>, EthApi) {
