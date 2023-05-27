@@ -50,6 +50,7 @@ fn average_duration(durations: &[std::time::Duration]) -> std::time::Duration {
 async fn spawn_http() -> (Arc<Provider<Ipc>>, EthApi) {
     let config = NodeConfig::default()
         .with_eth_rpc_url(Some(env::var("ETH_RPC_URL").expect("ETH_RPC_URL not found in .env")))
+        .with_port(1299)
         .with_fork_block_number::<u64>(Some(14445961))
         .with_ipc(Some(None))
         .with_steps_tracing(true)
@@ -63,6 +64,7 @@ async fn spawn_http() -> (Arc<Provider<Ipc>>, EthApi) {
     api.anvil_auto_impersonate_account(true).await.unwrap();
     let provider =
         Arc::new(Provider::<Ipc>::connect_ipc(handle.ipc_path().unwrap()).await.unwrap());
+    println!("ipc: {:?}", handle.ipc_path().unwrap());
     (provider, api)
 }
 
