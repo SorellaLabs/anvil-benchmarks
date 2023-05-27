@@ -5,11 +5,12 @@ use ethers::{
     prelude::{gas_oracle::blocknative::GasEstimate, *},
 };
 use serde::{Deserialize, Serialize};
-use std::{env, sync::Arc, time::Instant};
+use std::{env, sync::Arc, time::{Instant, Duration}, thread};
 use tokio::runtime::Runtime;
 
 #[tokio::main]
 async fn main() {
+    thread::sleep(Duration::from_secs(10));
     let (provider, api) = spawn_rpc().await;
     system_shutdown(provider, &api).await;
 
@@ -21,12 +22,15 @@ async fn main() {
     .await
     .unwrap();
     fork.storage_write().clear();
+    // check this function out
+    let mut states = api.anvil_reset(None).await;
     println!("Fork cache cleared");    
 }
 
 async fn spawn_rpc() -> (Arc<Provider<Ipc>>, EthApi) {
     let config = NodeConfig::default()
         .with_eth_rpc_url(Some(env::var("ETH_RPC_URL").expect("ETH_RPC_URL not found in .env")))
+        .with_port(1299)
         .with_fork_block_number::<u64>(Some(14445961))
         .with_ipc(Some(None))
         .with_steps_tracing(true)
@@ -38,6 +42,7 @@ async fn spawn_rpc() -> (Arc<Provider<Ipc>>, EthApi) {
     api.anvil_auto_impersonate_account(true).await.unwrap();
     let provider =
         Arc::new(Provider::<Ipc>::connect_ipc(handle.ipc_path().unwrap()).await.unwrap());
+    println!("ipc: {:?}", handle.ipc_path().unwrap());
     (provider, api)
 }
 
