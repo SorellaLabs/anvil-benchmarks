@@ -1,9 +1,6 @@
 use anvil::{eth::EthApi, spawn, NodeConfig};
 use anvil_benchmarks::bindings::convex::ShutdownSystemCall;
-use ethers::{
-    abi::AbiEncode, 
-    prelude::*,
-};
+use ethers::{abi::AbiEncode, prelude::*};
 use std::{env, sync::Arc, time::Instant};
 
 #[tokio::main]
@@ -40,7 +37,6 @@ async fn main() {
     println!("Average eth_call duration via Ipc fork: {:?}", avg_duration_ipc);
     println!("Average eth_call duration via ethers-reth fork: {:?}", avg_duration_reth_middleware);
 }
-
 
 fn average_duration(durations: &[std::time::Duration]) -> std::time::Duration {
     let sum: std::time::Duration = durations.iter().sum();
@@ -86,7 +82,6 @@ async fn spawn_ipc() -> (Arc<Provider<Ipc>>, EthApi) {
     (provider, api)
 }
 
-
 async fn spawn_reth_middleware() -> (Arc<Provider<Ipc>>, EthApi) {
     let config = NodeConfig::default()
         .with_eth_ipc_path(Some(env::var("ETH_IPC_PATH").expect("ETH_IPC_PATH not found in .env")))
@@ -106,9 +101,7 @@ async fn spawn_reth_middleware() -> (Arc<Provider<Ipc>>, EthApi) {
     (provider, api)
 }
 
-
-
-async fn system_shutdown(provider: Arc<Provider<Ipc>>, api: &EthApi) {
+async fn system_shutdown(provider: Arc<Provider<Ipc>>, api: &EthApi) -> std::time::Duration {
     let convex_sys: H160 = "0xF403C135812408BFbE8713b5A23a04b3D48AAE31".parse().unwrap();
     let owner: H160 = "0x3cE6408F923326f81A7D7929952947748180f1E6".parse().unwrap();
 
@@ -130,14 +123,8 @@ async fn system_shutdown(provider: Arc<Provider<Ipc>>, api: &EthApi) {
         chain_id: Some(1.into()),
     };
 
-
     let start = Instant::now();
-    let result = api.call(
-        tx.into(),
-        Some(BlockId::Number(14445961.into())),
-        None,
-    ).await.unwrap();
+    let _result = api.call(tx.into(), Some(BlockId::Number(14445961.into())), None).await.unwrap();
 
-    let duration = start.elapsed();
-    println!("Call took: {:?}", duration);
+    start.elapsed()
 }
