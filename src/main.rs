@@ -14,7 +14,7 @@ async fn main() {
     let (provider, api) = spawn_rpc().await;
     system_shutdown(provider, &api).await;
 
-    let mut fork = api.get_fork().unwrap();
+    let fork = api.get_fork().unwrap();
     fork.reset(
         Some(env::var("ETH_RPC_URL").expect("ETH_RPC_URL not found in .env")),
         BlockId::Number(14445961.into()),
