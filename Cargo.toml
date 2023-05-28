@@ -20,3 +20,7 @@ anvil = {git = "https://github.com/SorellaLabs/fastfoundry.git"}
 ethers = {version = "2.0.4", features = ["ipc"]}
 serde = {version = "1.0.163"}
 tokio = {version = "1.13.0", features = ["full"]}
+ndarray = "0.15"
+ndarray-stats = "0.5.1"
+num-traits = "0.2.15"
+lazy_static = "1.4.0"
