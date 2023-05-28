@@ -74,6 +74,47 @@ fn print_statistics(label: &str, durations: &Vec<f64>) {
     println!("Max eth_call duration via {}: {} seconds", label, max_duration);
 }
 
+async fn system_shutdown(provider: Arc<Provider<Ipc>>, api: &EthApi) {
+    let convex_sys: H160 = "0xF403C135812408BFbE8713b5A23a04b3D48AAE31".parse().unwrap();
+    let owner: H160 = "0x3cE6408F923326f81A7D7929952947748180f1E6".parse().unwrap();
+
+    api.anvil_set_balance(owner, U256::from(1e19 as u64)).await.unwrap();
+
+    let shutdown = ShutdownSystemCall {}.encode().into();
+
+    let nonce = provider.get_transaction_count(owner, None).await.unwrap();
+    let gas_price = provider.get_gas_price().await.unwrap();
+
+    let tx = TransactionRequest {
+        from: Some(owner),
+        to: Some(convex_sys.into()),
+        value: None,
+        gas_price: Some(gas_price),
+        nonce: Some(nonce),
+        gas: Some(28_000_000u64.into()),
+        data: Some(shutdown),
+        chain_id: Some(1.into()),
+    };
+
+    let _result = api.call(tx.into(), Some(BlockId::Number(14445961.into())), None).await.unwrap();
+}
+
+pub async fn shutdown(api: EthApi, handle: NodeHandle) {
+    // If fork exists, flush the cache
+    if let Some(fork) = api.get_fork().clone() {
+        fork.database().read().await.flush_cache();
+    }
+    handle.server.abort();
+
+    // shutdown the node_service, this would typically stop the service and clean up resources
+    handle.node_service.abort();
+
+    drop(api);
+
+    // Drop the handle to fire the shutdown signal
+    drop(handle);
+}
+
 async fn spawn_http() -> (Arc<Provider<Ipc>>, EthApi, NodeHandle) {
     let mut is_first_call = HTTP_FLAG.lock().unwrap();
     let config = if *is_first_call {
@@ -145,45 +186,4 @@ async fn spawn_ethers_reth() -> (Arc<Provider<Ipc>>, EthApi, NodeHandle) {
     let provider =
         Arc::new(Provider::<Ipc>::connect_ipc(handle.ipc_path().unwrap()).await.unwrap());
     (provider, api, handle)
-}
-
-async fn system_shutdown(provider: Arc<Provider<Ipc>>, api: &EthApi) {
-    let convex_sys: H160 = "0xF403C135812408BFbE8713b5A23a04b3D48AAE31".parse().unwrap();
-    let owner: H160 = "0x3cE6408F923326f81A7D7929952947748180f1E6".parse().unwrap();
-
-    api.anvil_set_balance(owner, U256::from(1e19 as u64)).await.unwrap();
-
-    let shutdown = ShutdownSystemCall {}.encode().into();
-
-    let nonce = provider.get_transaction_count(owner, None).await.unwrap();
-    let gas_price = provider.get_gas_price().await.unwrap();
-
-    let tx = TransactionRequest {
-        from: Some(owner),
-        to: Some(convex_sys.into()),
-        value: None,
-        gas_price: Some(gas_price),
-        nonce: Some(nonce),
-        gas: Some(28_000_000u64.into()),
-        data: Some(shutdown),
-        chain_id: Some(1.into()),
-    };
-
-    let _result = api.call(tx.into(), Some(BlockId::Number(14445961.into())), None).await.unwrap();
-}
-
-pub async fn shutdown(api: EthApi, handle: NodeHandle) {
-    // If fork exists, flush the cache
-    if let Some(fork) = api.get_fork().clone() {
-        fork.database().read().await.flush_cache();
-    }
-    handle.server.abort();
-
-    // shutdown the node_service, this would typically stop the service and clean up resources
-    handle.node_service.abort();
-
-    drop(api);
-
-    // Drop the handle to fire the shutdown signal
-    drop(handle);
 }
