@@ -26,11 +26,11 @@ async fn main() {
     let durations_rpc = collect_durations(NUM_ITERATIONS, spawn_http).await;
     print_statistics("http fork", &durations_rpc);
 
-    // let durations_ipc = collect_durations(NUM_ITERATIONS, spawn_ipc).await;
-    // print_statistics("Ipc fork", &durations_ipc);
+    let durations_ipc = collect_durations(NUM_ITERATIONS, spawn_ipc).await;
+    print_statistics("Ipc fork", &durations_ipc);
 
-    // let durations_ethers_reth = collect_durations(NUM_ITERATIONS, spawn_ethers_reth).await;
-    // print_statistics("Ipc fork", &durations_ipc);
+    let durations_ethers_reth = collect_durations(NUM_ITERATIONS, spawn_ethers_reth).await;
+     print_statistics("Ipc fork", &durations_ipc);
 }
 
 async fn collect_durations<F, Fut>(num_iterations: usize, spawn_function: F) -> Vec<f64>

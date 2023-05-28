@@ -1,10 +1,12 @@
+![](assets/RaceOfTheForks.png)
+
 # Anvil systemShutdown provider benchmarks
 
 This repository benchmarks the performance of various anvil providers by simulating a call to Convex's systemShutdown method (a method that typically requires a substantial amount of gas and performs numerous token transfers).
 
 ## Background
 
-The IPC and Ethers Reth middleware functionality has been developed by Sorella Labs for our backtesting needs. Our hope is to contribute these developments to foundry in the near future.
+The IPC and Ethers Reth middleware functionality has been developed by Sorella Labs for our back-testing needs. Our hope is to contribute these developments to foundry in the near future.
 
 ## Methodology
 
