@@ -21,7 +21,7 @@ lazy_static! {
 
 #[tokio::main]
 async fn main() {
-    const NUM_ITERATIONS: usize = 10;
+    const NUM_ITERATIONS: usize = 5;
 
     let durations_rpc = collect_durations(NUM_ITERATIONS, spawn_http).await;
     print_statistics("http fork", &durations_rpc);
