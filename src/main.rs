@@ -19,6 +19,8 @@ lazy_static! {
     static ref RETH_FLAG: Mutex<bool> = Mutex::new(true);
 }
 
+//TODO: fix the num iteration limitation (to many connections) & fix the trace subscriber creation for the reruns of the ipc
+
 #[tokio::main]
 async fn main() {
     const NUM_ITERATIONS: usize = 5;
