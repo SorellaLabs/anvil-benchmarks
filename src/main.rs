@@ -29,8 +29,8 @@ async fn main() {
     let durations_ipc = collect_durations(NUM_ITERATIONS, spawn_ipc).await;
     print_statistics("Ipc fork", &durations_ipc);
 
-    let durations_ethers_reth = collect_durations(NUM_ITERATIONS, spawn_ethers_reth).await;
-    print_statistics("Ipc fork", &durations_ethers_reth);
+    //let durations_ethers_reth = collect_durations(NUM_ITERATIONS, spawn_ethers_reth).await;
+    //print_statistics("Ipc fork", &durations_ethers_reth);
 }
 
 async fn collect_durations<F, Fut>(num_iterations: usize, spawn_function: F) -> Vec<f64>
