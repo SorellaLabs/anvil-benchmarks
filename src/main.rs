@@ -130,7 +130,7 @@ async fn spawn_http() -> (Arc<Provider<Ipc>>, EthApi, NodeHandle) {
             .no_storage_caching()
     } else {
         NodeConfig::default()
-            .with_eth_rpc_url(Some(env::var("ETH_RPC_URL").expect("ETH_RPC_URL not found in .env")))
+            .with_eth_rpc_url(Some(env::var("ETH_RPC_URL_LOCAL").expect("ETH_RPC_URL not found in .env")))
             .with_port(1299)
             .with_fork_block_number::<u64>(Some(14445961))
             .with_ipc(Some(None))
