@@ -149,6 +149,7 @@ async fn spawn_http(
     if TRACE_COUNT.load(Ordering::SeqCst) == 0 {
         config = config.with_tracing(true).with_steps_tracing(true);
         TRACE_COUNT.fetch_add(1, Ordering::SeqCst);
+        TRACE_COUNT.load(Ordering::SeqCst);
     } else {
         config = config.silent().with_steps_tracing(false);
     }
