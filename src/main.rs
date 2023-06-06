@@ -3,59 +3,62 @@ mod bindings;
 use anvil::{eth::EthApi, spawn, NodeConfig, NodeHandle};
 use bindings::convex::ShutdownSystemCall;
 use ethers::{abi::AbiEncode, prelude::*};
-use lazy_static::lazy_static;
 use ndarray::Array1;
 use ndarray_stats::QuantileExt;
-use std::{
-    env,
-    future::Future,
-    sync::{Arc, Mutex},
-    time::Instant,
-};
+use std::{env, future::Future, sync::Arc, time::Instant};
 
-lazy_static! {
-    static ref HTTP_FLAG: Mutex<bool> = Mutex::new(true);
-    static ref IPC_FLAG: Mutex<bool> = Mutex::new(true);
-    static ref RETH_FLAG: Mutex<bool> = Mutex::new(true);
-}
+// Magic constant, ideally we'd have a place for these or pass as a parameter.
+const GAS: u64 = 28_000_000;
 
 #[tokio::main]
+
 async fn main() {
     const NUM_ITERATIONS: usize = 10;
 
-    let durations_rpc = collect_durations(NUM_ITERATIONS, spawn_http).await;
-    print_statistics("http fork", &durations_rpc);
+    let durations_http = collect_durations(NUM_ITERATIONS, || spawn_http(true, false)).await;
+    print_statistics("http fork", &durations_http);
+
+    let durations_http_local = collect_durations(NUM_ITERATIONS, || spawn_http(false, true)).await;
+    print_statistics("http local fork", &durations_http_local);
 
     let durations_ipc = collect_durations(NUM_ITERATIONS, spawn_ipc).await;
     print_statistics("Ipc fork", &durations_ipc);
 
     let durations_ethers_reth = collect_durations(NUM_ITERATIONS, spawn_ethers_reth).await;
-    print_statistics("Ipc fork", &durations_ethers_reth);
+    print_statistics("Ipc ethers_reth fork", &durations_ethers_reth);
 }
 
 async fn collect_durations<F, Fut>(num_iterations: usize, spawn_function: F) -> Vec<f64>
 where
     F: Fn() -> Fut,
-    Fut: Future<Output = (Arc<Provider<Ipc>>, EthApi, NodeHandle)> + 'static,
+    Fut: Future<
+            Output = Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>>,
+        > + 'static,
 {
     let mut durations = vec![];
     for _ in 0..num_iterations {
-        let duration = measure_system_shutdown(&spawn_function).await;
-        durations.push(duration);
+        match measure_system_shutdown(&spawn_function).await {
+            Ok(duration) => durations.push(duration),
+            Err(e) => eprintln!("Error while measuring system shutdown: {}", e),
+        }
     }
     durations
 }
 
-async fn measure_system_shutdown<Fut>(spawn_function: impl Fn() -> Fut) -> f64
+async fn measure_system_shutdown<Fut>(
+    spawn_function: impl Fn() -> Fut,
+) -> Result<f64, Box<dyn std::error::Error>>
 where
-    Fut: Future<Output = (Arc<Provider<Ipc>>, EthApi, NodeHandle)> + 'static,
+    Fut: Future<
+            Output = Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>>,
+        > + 'static,
 {
     let start = Instant::now();
-    let (provider, api, handle) = (spawn_function)().await;
+    let (provider, api, handle) = (spawn_function)().await?;
     system_shutdown(provider.clone(), &api).await;
     let duration = start.elapsed();
     shutdown(api, handle).await;
-    duration.as_secs_f64()
+    Ok(duration.as_secs_f64())
 }
 
 fn print_statistics(label: &str, durations: &Vec<f64>) {
@@ -105,85 +108,79 @@ pub async fn shutdown(api: EthApi, handle: NodeHandle) {
         fork.database().read().await.flush_cache();
     }
     handle.server.abort();
-
-    // shutdown the node_service, this would typically stop the service and clean up resources
     handle.node_service.abort();
 
     drop(api);
-
-    // Drop the handle to fire the shutdown signal
     drop(handle);
 }
 
-async fn spawn_http() -> (Arc<Provider<Ipc>>, EthApi, NodeHandle) {
-    let mut is_first_call = HTTP_FLAG.lock().unwrap();
-    let config = if *is_first_call {
-        *is_first_call = false;
-        NodeConfig::default()
-            .with_eth_rpc_url(Some(env::var("ETH_RPC_URL").expect("ETH_RPC_URL not found in .env")))
-            .with_port(1299)
-            .with_fork_block_number::<u64>(Some(14445961))
-            .with_ipc(Some(None))
-            .with_tracing(true)
-            .with_steps_tracing(true)
-            .with_gas_limit(Some(30000000000_u64))
-            .no_storage_caching()
+async fn spawn_http(
+    tracing: bool,
+    local: bool,
+) -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>> {
+    let rpc_url = if local {
+        env::var("ETH_RPC_URL_LOCAL").expect("ETH_RPC_URL_LOCAL not found in .env")
     } else {
-        NodeConfig::default()
-            .with_eth_rpc_url(Some(env::var("ETH_RPC_URL").expect("ETH_RPC_URL not found in .env")))
-            .with_port(1299)
-            .with_fork_block_number::<u64>(Some(14445961))
-            .with_ipc(Some(None))
-            .with_tracing(false)
-            .with_steps_tracing(false)
-            .with_gas_limit(Some(30000000000_u64))
-            .no_storage_caching()
-            .silent()
+        env::var("ETH_RPC_URL").expect("ETH_RPC_URL not found in .env")
     };
-
-    // Spawn the node with the custom config
-    let (api, handle) = spawn(config).await;
-
-    api.anvil_auto_impersonate_account(true).await.unwrap();
-    let provider: Arc<Provider<Ipc>> =
-        Arc::new(Provider::<Ipc>::connect_ipc(&handle.ipc_path().unwrap()).await.unwrap());
-    println!("ipc: {:?}", &handle.ipc_path().unwrap());
-    (provider, api, handle)
-}
-
-async fn spawn_ipc() -> (Arc<Provider<Ipc>>, EthApi, NodeHandle) {
-    let config = NodeConfig::default()
-        .with_eth_ipc_path(Some(env::var("ETH_IPC_PATH").expect("ETH_IPC_PATH not found in .env")))
+    let mut config = NodeConfig::default()
+        .with_eth_rpc_url(Some(rpc_url.to_string()))
+        .with_port(1299)
         .with_fork_block_number::<u64>(Some(14445961))
         .with_ipc(Some(None))
-        .with_steps_tracing(true)
-        .with_gas_limit(Some(30000000000_u64))
+        .with_gas_limit(Some(GAS))
         .no_storage_caching();
 
-    // Spawn the node with the custom config
-    let (api, handle) = spawn(config).await;
+    if tracing {
+        config = config.with_tracing(true).with_steps_tracing(true);
+    } else {
+        config = config.silent().with_steps_tracing(false);
+    }
 
-    api.anvil_auto_impersonate_account(true).await.unwrap();
-    let provider =
-        Arc::new(Provider::<Ipc>::connect_ipc(handle.ipc_path().unwrap()).await.unwrap());
-    (provider, api, handle)
+    spawn_with_config(config).await
 }
 
-async fn spawn_ethers_reth() -> (Arc<Provider<Ipc>>, EthApi, NodeHandle) {
+async fn spawn_ipc() -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>>
+{
+    let ipc_path = env::var("ETH_IPC_PATH").expect("ETH_IPC_PATH not found in .env");
     let config = NodeConfig::default()
-        .with_eth_ipc_path(Some(env::var("ETH_IPC_PATH").expect("ETH_IPC_PATH not found in .env")))
-        .with_eth_reth_db(Some(env::var("ETH_DB_PATH").expect("ETH_DB_PATH not found in .env")))
+        .with_eth_ipc_path(Some(ipc_path.to_string()))
         .with_fork_block_number::<u64>(Some(14445961))
         .with_ipc(Some(None))
-        .with_steps_tracing(true)
-        .with_gas_limit(Some(30000000000_u64))
-        .no_storage_caching();
+        .with_steps_tracing(false)
+        .with_gas_limit(Some(GAS))
+        .no_storage_caching()
+        .silent();
 
-    // Spawn the node with the custom config
+    spawn_with_config(config).await
+}
+
+async fn spawn_ethers_reth(
+) -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>> {
+    let ipc_path = env::var("ETH_IPC_PATH").expect("ETH_IPC_PATH not found in .env");
+    let db_path = env::var("ETH_DB_PATH").expect("ETH_DB_PATH not found in .env");
+
+    let config = NodeConfig::default()
+        .with_eth_ipc_path(Some(ipc_path.to_string()))
+        .with_eth_reth_db(Some(db_path.to_string()))
+        .with_fork_block_number::<u64>(Some(14445961))
+        .with_ipc(Some(None))
+        .with_steps_tracing(false)
+        .with_gas_limit(Some(GAS))
+        .no_storage_caching()
+        .silent();
+
+    spawn_with_config(config).await
+}
+
+async fn spawn_with_config(
+    config: NodeConfig,
+) -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>> {
     let (api, handle) = spawn(config).await;
 
-    api.anvil_auto_impersonate_account(true).await.unwrap();
-    let provider =
-        Arc::new(Provider::<Ipc>::connect_ipc(handle.ipc_path().unwrap()).await.unwrap());
-    (provider, api, handle)
+    api.anvil_auto_impersonate_account(true).await?;
+
+    let provider = Arc::new(Provider::<Ipc>::connect_ipc(handle.ipc_path().unwrap()).await?);
+
+    Ok((provider, api, handle))
 }
