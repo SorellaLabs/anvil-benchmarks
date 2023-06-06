@@ -10,10 +10,12 @@ use std::{env, future::Future, sync::Arc, time::Instant};
 // Magic constant, ideally we'd have a place for these or pass as a parameter.
 const GAS: u64 = 28_000_000;
 
+//TODO: fix the num iteration limitation (to many connections) & fix the trace subscriber creation for the reruns of the ipc
+
 #[tokio::main]
 
 async fn main() {
-    const NUM_ITERATIONS: usize = 10;
+    const NUM_ITERATIONS: usize = 5;
 
     let durations_http = collect_durations(NUM_ITERATIONS, || spawn_http(true, false)).await;
     print_statistics("http fork", &durations_http);
