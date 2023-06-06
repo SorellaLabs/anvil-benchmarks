@@ -15,10 +15,7 @@ const GAS: u64 = 28_000_000;
 #[tokio::main]
 
 async fn main() {
-    const NUM_ITERATIONS: usize = 5;
-
-    let durations_http = collect_durations(NUM_ITERATIONS, || spawn_http(true, false)).await;
-    print_statistics("http fork", &durations_http);
+    const NUM_ITERATIONS: usize = 10;
 
     let durations_http_local = collect_durations(NUM_ITERATIONS, || spawn_http(false, true)).await;
     print_statistics("http local fork", &durations_http_local);
@@ -28,6 +25,10 @@ async fn main() {
 
     let durations_ethers_reth = collect_durations(NUM_ITERATIONS, spawn_ethers_reth).await;
     print_statistics("Ipc ethers_reth fork", &durations_ethers_reth);
+
+    let durations_http = collect_durations(NUM_ITERATIONS, || spawn_http(true, false)).await;
+    print_statistics("http fork", &durations_http);
+    
 }
 
 async fn collect_durations<F, Fut>(num_iterations: usize, spawn_function: F) -> Vec<f64>
