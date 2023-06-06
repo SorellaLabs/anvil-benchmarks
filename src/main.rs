@@ -1,26 +1,23 @@
 mod bindings;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use std::time::Instant;
 
 use anvil::{eth::EthApi, spawn, NodeConfig, NodeHandle};
 use bindings::convex::ShutdownSystemCall;
 use ethers::{abi::AbiEncode, prelude::*};
 use ndarray::Array1;
 use ndarray_stats::QuantileExt;
-use std::{env, future::Future, sync::Arc, time::Instant};
+use std::{env, future::Future};
+use std::sync::atomic::{AtomicU8, Ordering};
 
-// Magic constant, ideally we'd have a place for these or pass as a parameter.
 const GAS: u64 = 28_000_000;
-static INITIALIZED: AtomicBool = AtomicBool::new(false);
-
-//TODO: fix the num iteration limitation (to many connections) & fix the trace subscriber creation
-// for the reruns of the ipc
+static TRACE_COUNT: AtomicU8 = AtomicU8::new(0);
 
 #[tokio::main]
-
 async fn main() {
     const NUM_ITERATIONS: usize = 10;
 
-    let durations_http_local = collect_durations(NUM_ITERATIONS, || spawn_http(true)).await;
+    let durations_http_local = collect_durations(NUM_ITERATIONS, spawn_http_local).await;
     print_statistics("http local fork", &durations_http_local);
 
     let durations_ipc = collect_durations(NUM_ITERATIONS, spawn_ipc).await;
@@ -29,7 +26,7 @@ async fn main() {
     let durations_ethers_reth = collect_durations(NUM_ITERATIONS, spawn_ethers_reth).await;
     print_statistics("Ipc ethers_reth fork", &durations_ethers_reth);
 
-    let durations_http = collect_durations(NUM_ITERATIONS, || spawn_http(false)).await;
+    let durations_http = collect_durations(NUM_ITERATIONS, spawn_http_external).await;
     print_statistics("http fork", &durations_http);
 }
 
@@ -119,6 +116,17 @@ pub async fn shutdown(api: EthApi, handle: NodeHandle) {
     drop(handle);
 }
 
+async fn spawn_http_local(
+) -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>> {
+    spawn_http(true).await
+}
+
+
+async fn spawn_http_external(
+) -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>> {
+    spawn_http(false).await
+}
+
 async fn spawn_http(
     local: bool,
 ) -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>> {
@@ -127,6 +135,7 @@ async fn spawn_http(
     } else {
         env::var("ETH_RPC_URL").expect("ETH_RPC_URL not found in .env")
     };
+
     let mut config = NodeConfig::default()
         .with_eth_rpc_url(Some(rpc_url.to_string()))
         .with_port(1299)
@@ -135,17 +144,18 @@ async fn spawn_http(
         .with_gas_limit(Some(GAS))
         .no_storage_caching();
 
-    // Check whether tracing has been initialized
-    if !INITIALIZED.load(Ordering::SeqCst) {
+    // only set up tracing for the first run
+    if TRACE_COUNT.load(Ordering::SeqCst) == 0 {
         config = config.with_tracing(true).with_steps_tracing(true);
-        // Remember that we have initialized tracing
-        INITIALIZED.store(true, Ordering::SeqCst);
+        TRACE_COUNT.fetch_add(1, Ordering::SeqCst);
     } else {
         config = config.silent().with_steps_tracing(false);
     }
 
     spawn_with_config(config).await
 }
+
+
 async fn spawn_ipc() -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>>
 {
     let ipc_path = env::var("ETH_IPC_PATH").expect("ETH_IPC_PATH not found in .env");
