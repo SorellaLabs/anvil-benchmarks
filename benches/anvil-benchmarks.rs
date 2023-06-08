@@ -21,6 +21,17 @@ impl SpawnResult {
     }
 }
 
+pub fn benchmark_ipc(c: &mut Criterion) {
+    let rt = Runtime::new().unwrap();
+    let anvil_result = rt.block_on(async { spawn_ipc().await.unwrap() });
+
+    c.bench_function("ipc_shutdown", |b| {
+        b.to_async(&rt).iter(|| async {
+            system_shutdown(&anvil_result.api, anvil_result.transaction.clone()).await
+        })
+    });
+}
+
 pub fn benchmark_http_local(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
     let anvil_result = rt.block_on(async { spawn_http_local().await.unwrap() });
@@ -37,17 +48,6 @@ pub fn benchmark_http(c: &mut Criterion) {
     let anvil_result = rt.block_on(async { spawn_http_external().await.unwrap() });
 
     c.bench_function("http_shutdown", |b: &mut criterion::Bencher<'_>| {
-        b.to_async(&rt).iter(|| async {
-            system_shutdown(&anvil_result.api, anvil_result.transaction.clone()).await
-        })
-    });
-}
-
-pub fn benchmark_ipc(c: &mut Criterion) {
-    let rt = Runtime::new().unwrap();
-    let anvil_result = rt.block_on(async { spawn_ipc().await.unwrap() });
-
-    c.bench_function("ipc_shutdown", |b| {
         b.to_async(&rt).iter(|| async {
             system_shutdown(&anvil_result.api, anvil_result.transaction.clone()).await
         })
@@ -125,7 +125,9 @@ async fn spawn_ethers_reth() -> Result<SpawnResult, Box<dyn Error>> {
         .with_fork_block_number::<u64>(Some(14445961))
         .with_ipc(Some(None))
         .with_gas_limit(Some(GAS))
-        .no_storage_caching();
+        .no_storage_caching()
+        .with_steps_tracing(false)
+        .silent();
 
     spawn_with_config(config).await
 }
@@ -142,7 +144,9 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
         .with_fork_block_number::<u64>(Some(14445961))
         .with_ipc(Some(None))
         .with_gas_limit(Some(GAS))
-        .no_storage_caching();
+        .no_storage_caching()
+        .with_steps_tracing(false)
+        .silent();
 
     spawn_with_config(config).await
 }
