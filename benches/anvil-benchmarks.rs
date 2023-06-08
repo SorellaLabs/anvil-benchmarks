@@ -6,10 +6,8 @@ use bindings::convex::ShutdownSystemCall;
 
 use anvil::{eth::EthApi, spawn, NodeConfig};
 use ethers::{abi::AbiEncode, prelude::*};
-use std::env;
+use std::{env, sync::Arc};
 use tokio::runtime::Runtime;
-
-use std::str::FromStr;
 
 const GAS: u64 = 28_000_000;
 struct SpawnResult {
@@ -72,18 +70,30 @@ async fn system_shutdown(api: &EthApi, transaction: TransactionRequest) {
 }
 
 async fn spawn_with_config(config: NodeConfig) -> Result<SpawnResult, Box<dyn Error>> {
-    let (api, _handle) = spawn(config).await;
+    let (api, handle) = spawn(config).await;
 
-    api.anvil_auto_impersonate_account(true).await?;
+    let convex_sys: H160 = "0xF403C135812408BFbE8713b5A23a04b3D48AAE31".parse().unwrap();
+    let owner: H160 = "0x3cE6408F923326f81A7D7929952947748180f1E6".parse().unwrap();
 
-    let convex_sys = H160::from_str("0xF403C135812408BFbE8713b5A23a04b3D48AAE31").unwrap();
-    let owner = H160::from_str("0x3cE6408F923326f81A7D7929952947748180aF46").unwrap();
-    let data: Bytes = ShutdownSystemCall {}.encode().into();
+    api.anvil_set_balance(owner, U256::from(1e19 as u64)).await.unwrap();
+    let provider = Arc::new(Provider::<Ipc>::connect_ipc(handle.ipc_path().unwrap()).await?);
+    let shutdown = ShutdownSystemCall {}.encode().into();
 
-    let transaction =
-        TransactionRequest::new().from(owner).to(convex_sys).gas::<U256>(GAS.into()).data(data);
+    let nonce = provider.get_transaction_count(owner, None).await.unwrap();
+    let gas_price = provider.get_gas_price().await.unwrap();
 
-    Ok(SpawnResult::new(api, transaction))
+    let tx = TransactionRequest {
+        from: Some(owner),
+        to: Some(convex_sys.into()),
+        value: None,
+        gas_price: Some(gas_price),
+        nonce: Some(nonce),
+        gas: Some(28_000_000u64.into()),
+        data: Some(shutdown),
+        chain_id: Some(1.into()),
+    };
+
+    Ok(SpawnResult::new(api, tx))
 }
 async fn spawn_http_local() -> Result<SpawnResult, Box<dyn Error>> {
     spawn_http(true).await
@@ -98,6 +108,7 @@ async fn spawn_ipc() -> Result<SpawnResult, Box<dyn Error>> {
     let config = NodeConfig::default()
         .with_eth_ipc_path(Some(ipc_path.to_string()))
         .with_fork_block_number::<u64>(Some(14445961))
+        .with_ipc(Some(None))
         .with_gas_limit(Some(GAS))
         .no_storage_caching();
 
@@ -112,6 +123,7 @@ async fn spawn_ethers_reth() -> Result<SpawnResult, Box<dyn Error>> {
         .with_eth_ipc_path(Some(ipc_path.to_string()))
         .with_eth_reth_db(Some(db_path.to_string()))
         .with_fork_block_number::<u64>(Some(14445961))
+        .with_ipc(Some(None))
         .with_gas_limit(Some(GAS))
         .no_storage_caching();
 
@@ -128,6 +140,7 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
         .with_eth_rpc_url(Some(rpc_url.to_string()))
         .with_port(1299)
         .with_fork_block_number::<u64>(Some(14445961))
+        .with_ipc(Some(None))
         .with_gas_limit(Some(GAS))
         .no_storage_caching();
 
