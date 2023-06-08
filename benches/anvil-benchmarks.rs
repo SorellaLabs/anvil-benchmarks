@@ -110,9 +110,7 @@ async fn spawn_ipc() -> Result<SpawnResult, Box<dyn Error>> {
         .with_fork_block_number::<u64>(Some(14445961))
         .with_ipc(Some(None))
         .with_gas_limit(Some(GAS))
-        .no_storage_caching()
-        .with_steps_tracing(false)
-        .silent();
+        .no_storage_caching();
 
     spawn_with_config(config).await
 }
@@ -129,6 +127,7 @@ async fn spawn_ethers_reth() -> Result<SpawnResult, Box<dyn Error>> {
         .with_gas_limit(Some(GAS))
         .no_storage_caching()
         .with_steps_tracing(false)
+        .with_tracing(false)
         .silent();
 
     spawn_with_config(config).await
@@ -148,6 +147,7 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
         .with_gas_limit(Some(GAS))
         .no_storage_caching()
         .with_steps_tracing(false)
+        .with_tracing(false)
         .silent();
 
     spawn_with_config(config).await
