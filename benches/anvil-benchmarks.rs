@@ -98,10 +98,8 @@ async fn spawn_ipc() -> Result<SpawnResult, Box<dyn Error>> {
     let config = NodeConfig::default()
         .with_eth_ipc_path(Some(ipc_path.to_string()))
         .with_fork_block_number::<u64>(Some(14445961))
-        .with_steps_tracing(false)
         .with_gas_limit(Some(GAS))
-        .no_storage_caching()
-        .silent();
+        .no_storage_caching();
 
     spawn_with_config(config).await
 }
@@ -114,10 +112,8 @@ async fn spawn_ethers_reth() -> Result<SpawnResult, Box<dyn Error>> {
         .with_eth_ipc_path(Some(ipc_path.to_string()))
         .with_eth_reth_db(Some(db_path.to_string()))
         .with_fork_block_number::<u64>(Some(14445961))
-        .with_steps_tracing(false)
         .with_gas_limit(Some(GAS))
-        .no_storage_caching()
-        .silent();
+        .no_storage_caching();
 
     spawn_with_config(config).await
 }
@@ -133,9 +129,7 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
         .with_port(1299)
         .with_fork_block_number::<u64>(Some(14445961))
         .with_gas_limit(Some(GAS))
-        .no_storage_caching()
-        .silent()
-        .with_steps_tracing(false);
+        .no_storage_caching();
 
     spawn_with_config(config).await
 }
