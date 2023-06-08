@@ -1,7 +1,9 @@
-mod bindings;
-
 use criterion::{criterion_group, criterion_main, Criterion};
 use std::error::Error;
+
+use anvil::{eth::EthApi, spawn, NodeConfig, NodeHandle};
+use anvil_bindings::bindings::convex::ShutdownSystemCall;
+use ethers::{abi::AbiEncode, prelude::*};
 
 use criterion::async_executor::FuturesExecutor;
 
