@@ -110,7 +110,9 @@ async fn spawn_ipc() -> Result<SpawnResult, Box<dyn Error>> {
         .with_fork_block_number::<u64>(Some(14445961))
         .with_ipc(Some(None))
         .with_gas_limit(Some(GAS))
-        .no_storage_caching();
+        .no_storage_caching()
+        .with_steps_tracing(false)
+        .silent();
 
     spawn_with_config(config).await
 }
