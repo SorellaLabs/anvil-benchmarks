@@ -1,165 +1,101 @@
 mod bindings;
-use std::sync::Arc;
-use std::time::Instant;
 
-use anvil::{eth::EthApi, spawn, NodeConfig, NodeHandle};
-use bindings::convex::ShutdownSystemCall;
-use ethers::{abi::AbiEncode, prelude::*};
-use ndarray::Array1;
-use ndarray_stats::QuantileExt;
-use std::{env, future::Future};
-use std::sync::atomic::{AtomicU8, Ordering};
+use criterion::{criterion_group, criterion_main, Criterion};
+use std::error::Error;
 
-const GAS: u64 = 28_000_000;
-static TRACE_COUNT: AtomicU8 = AtomicU8::new(0);
+use criterion::async_executor::FuturesExecutor;
 
-#[tokio::main]
-async fn main() {
-    const NUM_ITERATIONS: usize = 10;
-
-    let durations_http_local = collect_durations(NUM_ITERATIONS, spawn_http_local).await;
-    print_statistics("http local fork", &durations_http_local);
-
-    let durations_ipc = collect_durations(NUM_ITERATIONS, spawn_ipc).await;
-    print_statistics("Ipc fork", &durations_ipc);
-
-    let durations_ethers_reth = collect_durations(NUM_ITERATIONS, spawn_ethers_reth).await;
-    print_statistics("Ipc ethers_reth fork", &durations_ethers_reth);
-
-    let durations_http = collect_durations(NUM_ITERATIONS, spawn_http_external).await;
-    print_statistics("http fork", &durations_http);
+struct SpawnResult {
+    provider: Arc<Provider<Ipc>>,
+    api: EthApi,
+    handle: NodeHandle,
 }
 
-async fn collect_durations<F, Fut>(num_iterations: usize, spawn_function: F) -> Vec<f64>
-where
-    F: Fn() -> Fut,
-    Fut: Future<
-            Output = Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>>,
-        > + 'static,
-{
-    let mut durations = vec![];
-    for _ in 0..num_iterations {
-        match measure_system_shutdown(&spawn_function).await {
-            Ok(duration) => durations.push(duration),
-            Err(e) => eprintln!("Error while measuring system shutdown: {}", e),
-        }
+impl SpawnResult {
+    fn new(provider: Arc<Provider<Ipc>>, api: EthApi, handle: NodeHandle) -> Self {
+        Self { provider, api, handle }
     }
-    durations
 }
 
-async fn measure_system_shutdown<Fut>(
-    spawn_function: impl Fn() -> Fut,
-) -> Result<f64, Box<dyn std::error::Error>>
-where
-    Fut: Future<
-            Output = Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>>,
-        > + 'static,
-{
-    let start = Instant::now();
-    let (provider, api, handle) = (spawn_function)().await?;
-    system_shutdown(provider.clone(), &api).await;
-    let duration = start.elapsed();
-    shutdown(api, handle).await;
-    Ok(duration.as_secs_f64())
+pub fn benchmark_http_local(c: &mut Criterion) {
+    c.bench_function("http_local_fork", |b| {
+        b.to_async(FuturesExecutor).iter(|| {
+            let spawn = spawn_http_local();
+
+            system_shutdown(spawn.provider, spawn.api);
+        })
+    });
 }
 
-fn print_statistics(label: &str, durations: &Vec<f64>) {
-    let array_durations: Array1<f64> = Array1::from(durations.clone());
+pub fn benchmark_http(c: &mut Criterion) {
+    c.bench_function("http_fork", |b| {
+        b.to_async(FuturesExecutor).iter(|| {
+            let spawn = spawn_http_external();
 
-    let mean_duration = array_durations.mean().unwrap();
-    let min_duration = array_durations.min().unwrap();
-    let max_duration = array_durations.max().unwrap();
+            system_shutdown(spawn.provider, spawn.api);
+        })
+    });
+}
 
-    let sum: f64 = durations.iter().map(|&x| (x - mean_duration).powi(2)).sum();
-    let std_dev_duration = (sum / (durations.len() - 1) as f64).sqrt();
+pub fn benchmark_ipc(c: &mut Criterion) {
+    c.bench_function("ipc_fork", |b| {
+        b.to_async(FuturesExecutor).iter(|| {
+            let spawn = spawn_ipc();
 
-    println!("Mean eth_call duration via {}: {} seconds", label, mean_duration);
-    println!("Std Dev of eth_call duration via {}: {} seconds", label, std_dev_duration);
-    println!("Min eth_call duration via {}: {} seconds", label, min_duration);
-    println!("Max eth_call duration via {}: {} seconds", label, max_duration);
+            system_shutdown(spawn.provider, spawn.api);
+        })
+    });
+}
+
+pub fn benchmark_reth(c: &mut Criterion) {
+    c.bench_function("reth_fork", |b| {
+        b.to_async(FuturesExecutor).iter(|| {
+            let spawn = spawn_ethers_reth();
+
+            system_shutdown(spawn.provider, spawn.api);
+        })
+    });
 }
 
 async fn system_shutdown(provider: Arc<Provider<Ipc>>, api: &EthApi) {
-    let convex_sys: H160 = "0xF403C135812408BFbE8713b5A23a04b3D48AAE31".parse().unwrap();
-    let owner: H160 = "0x3cE6408F923326f81A7D7929952947748180f1E6".parse().unwrap();
+    let convex_sys = H160::from_str("0xF403C135812408BFbE8713b5A23a04b3D48AAE31").unwrap();
+    let owner = H160::from_str("0x3cE6408F923326f81A7D7929952947748180f1E6").unwrap();
 
     api.anvil_set_balance(owner, U256::from(1e19 as u64)).await.unwrap();
-
-    let shutdown = ShutdownSystemCall {}.encode().into();
-
-    let nonce = provider.get_transaction_count(owner, None).await.unwrap();
-    let gas_price = provider.get_gas_price().await.unwrap();
 
     let tx = TransactionRequest {
         from: Some(owner),
         to: Some(convex_sys.into()),
         value: None,
-        gas_price: Some(gas_price),
-        nonce: Some(nonce),
+        gas_price: Some(provider.get_gas_price().await.unwrap()),
+        nonce: Some(provider.get_transaction_count(owner, None).await.unwrap()),
         gas: Some(28_000_000u64.into()),
-        data: Some(shutdown),
+        data: Some(ShutdownSystemCall {}.encode().into()),
         chain_id: Some(1.into()),
     };
 
-    let _result = api.call(tx.into(), Some(BlockId::Number(14445961.into())), None).await.unwrap();
+    api.call(tx.into(), Some(BlockId::Number(14445961.into())), None).await.unwrap();
 }
 
-pub async fn shutdown(api: EthApi, handle: NodeHandle) {
-    // If fork exists, flush the cache
-    if let Some(fork) = api.get_fork().clone() {
-        fork.database().read().await.flush_cache();
-    }
-    handle.server.abort();
-    handle.node_service.abort();
+async fn spawn_with_config(config: NodeConfig) -> Result<SpawnResult, Box<dyn Error>> {
+    let (api, handle) = spawn(config).await;
 
-    drop(api);
-    drop(handle);
+    api.anvil_auto_impersonate_account(true).await?;
+
+    let provider = Arc::new(Provider::<Ipc>::connect_ipc(handle.ipc_path().unwrap()).await?);
+
+    Ok(SpawnResult::new(provider, api, handle))
 }
 
-async fn spawn_http_local(
-) -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>> {
+async fn spawn_http_local() -> Result<SpawnResult, Box<dyn Error>> {
     spawn_http(true).await
 }
 
-
-async fn spawn_http_external(
-) -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>> {
+async fn spawn_http_external() -> Result<SpawnResult, Box<dyn Error>> {
     spawn_http(false).await
 }
 
-async fn spawn_http(
-    local: bool,
-) -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>> {
-    let rpc_url = if local {
-        env::var("ETH_RPC_URL_LOCAL").expect("ETH_RPC_URL_LOCAL not found in .env")
-    } else {
-        env::var("ETH_RPC_URL").expect("ETH_RPC_URL not found in .env")
-    };
-
-    let mut config = NodeConfig::default()
-        .with_eth_rpc_url(Some(rpc_url.to_string()))
-        .with_port(1299)
-        .with_fork_block_number::<u64>(Some(14445961))
-        .with_ipc(Some(None))
-        .with_gas_limit(Some(GAS))
-        .no_storage_caching();
-
-    // only set up tracing for the first run
-    println!("{:?}", TRACE_COUNT);
-    if TRACE_COUNT.load(Ordering::SeqCst) == 0 {
-        config = config.with_tracing(true).with_steps_tracing(true);
-        TRACE_COUNT.fetch_add(1, Ordering::SeqCst);
-        TRACE_COUNT.load(Ordering::SeqCst);
-    } else {
-        config = config.silent().with_steps_tracing(false);
-    }
-
-    spawn_with_config(config).await
-}
-
-
-async fn spawn_ipc() -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>>
-{
+async fn spawn_ipc() -> Result<SpawnResult, Box<dyn Error>> {
     let ipc_path = env::var("ETH_IPC_PATH").expect("ETH_IPC_PATH not found in .env");
     let config = NodeConfig::default()
         .with_eth_ipc_path(Some(ipc_path.to_string()))
@@ -173,8 +109,7 @@ async fn spawn_ipc() -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn
     spawn_with_config(config).await
 }
 
-async fn spawn_ethers_reth(
-) -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>> {
+async fn spawn_ethers_reth() -> Result<SpawnResult, Box<dyn Error>> {
     let ipc_path = env::var("ETH_IPC_PATH").expect("ETH_IPC_PATH not found in .env");
     let db_path = env::var("ETH_DB_PATH").expect("ETH_DB_PATH not found in .env");
 
@@ -191,14 +126,30 @@ async fn spawn_ethers_reth(
     spawn_with_config(config).await
 }
 
-async fn spawn_with_config(
-    config: NodeConfig,
-) -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>> {
-    let (api, handle) = spawn(config).await;
+async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
+    let rpc_url = match local {
+        true => env::var("ETH_RPC_URL_LOCAL").expect("ETH_RPC_URL_LOCAL not found in .env"),
+        false => env::var("ETH_RPC_URL").expect("ETH_RPC_URL not found in .env"),
+    };
 
-    api.anvil_auto_impersonate_account(true).await?;
+    let mut config = NodeConfig::default()
+        .with_eth_rpc_url(Some(rpc_url.to_string()))
+        .with_port(1299)
+        .with_fork_block_number::<u64>(Some(14445961))
+        .with_ipc(Some(None))
+        .with_gas_limit(Some(GAS))
+        .no_storage_caching();
 
-    let provider = Arc::new(Provider::<Ipc>::connect_ipc(handle.ipc_path().unwrap()).await?);
+    if TRACE_COUNT.load(Ordering::SeqCst) == 0 {
+        config = config.with_tracing(true).with_steps_tracing(true);
+        TRACE_COUNT.fetch_add(1, Ordering::SeqCst);
+        TRACE_COUNT.load(Ordering::SeqCst);
+    } else {
+        config = config.silent().with_steps_tracing(false);
+    }
 
-    Ok((provider, api, handle))
+    spawn_with_config(config).await
 }
+
+criterion_group!(benches, benchmark_http_local, benchmark_http, benchmark_ipc, benchmark_reth);
+criterion_main!(benches);
