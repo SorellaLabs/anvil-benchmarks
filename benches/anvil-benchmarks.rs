@@ -6,7 +6,7 @@ use bindings::convex::ShutdownSystemCall;
 
 use anvil::{eth::EthApi, spawn, NodeConfig};
 use ethers::{abi::AbiEncode, prelude::*};
-use std::{env, sync::Arc};
+use std::env;
 use tokio::runtime::Runtime;
 
 use std::str::FromStr;
@@ -72,7 +72,7 @@ async fn system_shutdown(api: &EthApi, transaction: TransactionRequest) {
 }
 
 async fn spawn_with_config(config: NodeConfig) -> Result<SpawnResult, Box<dyn Error>> {
-    let (api, handle) = spawn(config).await;
+    let (api, _handle) = spawn(config).await;
 
     api.anvil_auto_impersonate_account(true).await?;
 
