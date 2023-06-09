@@ -1,4 +1,5 @@
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput, PlotConfiguration, AxisScale};
+
 use std::error::Error;
 
 mod bindings;
@@ -32,6 +33,28 @@ pub fn benchmark_ipc(c: &mut Criterion) {
     });
 }
 
+pub fn benchmark_startup_ipc(c: &mut Criterion) {
+    let rt = Runtime::new().unwrap();
+
+    c.bench_function("ipc_startup", |b| {
+        b.to_async(&rt).iter(|| async {
+            spawn_ipc().await.unwrap();
+        })
+    });
+}
+
+pub fn benchmark_startup_and_shutdown_ipc(c: &mut Criterion) {
+    let rt = Runtime::new().unwrap();
+
+    c.bench_function("ipc_startup_and_shutdown", |b| {
+        b.to_async(&rt).iter(|| async {
+            let anvil_result = spawn_ipc().await.unwrap();
+            system_shutdown(&anvil_result.api, anvil_result.transaction.clone()).await;
+        })
+    });
+}
+
+
 pub fn benchmark_http_local(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
     let anvil_result = rt.block_on(async { spawn_http_local().await.unwrap() });
@@ -54,6 +77,27 @@ pub fn benchmark_http(c: &mut Criterion) {
     });
 }
 
+pub fn benchmark_startup_http_local(c: &mut Criterion) {
+    let rt = Runtime::new().unwrap();
+
+    c.bench_function("http_local_startup", |b| {
+        b.to_async(&rt).iter(|| async {
+            spawn_http_local().await.unwrap();
+        })
+    });
+}
+
+pub fn benchmark_startup_and_shutdown_http_local(c: &mut Criterion) {
+    let rt = Runtime::new().unwrap();
+
+    c.bench_function("http_local_startup_and_shutdown", |b| {
+        b.to_async(&rt).iter(|| async {
+            let anvil_result = spawn_http_local().await.unwrap();
+            system_shutdown(&anvil_result.api, anvil_result.transaction.clone()).await;
+        })
+    });
+}
+
 pub fn benchmark_reth(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
     let anvil_result = rt.block_on(async { spawn_ethers_reth().await.unwrap() });
@@ -64,6 +108,8 @@ pub fn benchmark_reth(c: &mut Criterion) {
         })
     });
 }
+
+
 
 async fn system_shutdown(api: &EthApi, transaction: TransactionRequest) {
     api.call(transaction.into(), Some(BlockId::Number(14445961.into())), None).await.unwrap();
@@ -156,5 +202,120 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
     spawn_with_config(config).await
 }
 
-criterion_group!(benches, benchmark_ipc, benchmark_reth, benchmark_http_local);
+
+pub fn benchmark_shutdowns(c: &mut Criterion) {
+    let mut group = c.benchmark_group("shutdowns");
+    let rt = Runtime::new().unwrap();
+
+    group.throughput(Throughput::Elements(1));
+    group.plot_config(PlotConfiguration::default().summary_scale(AxisScale::Logarithmic));
+
+    for method in ["ipc", "http_local", "reth"].iter() {
+        match *method {
+            "ipc" => {
+                let anvil_result = rt.block_on(async { spawn_ipc().await.unwrap() });
+                group.bench_with_input(BenchmarkId::new("Shutdown", "ipc"), &rt, |b, rt| {
+                    b.to_async(rt).iter(|| async {
+                        system_shutdown(&anvil_result.api, anvil_result.transaction.clone()).await
+                    })
+                });
+            },
+            "http_local" => {
+                let anvil_result = rt.block_on(async { spawn_http_local().await.unwrap() });
+                group.bench_with_input(BenchmarkId::new("Shutdown", "http_local"), &rt, |b, rt| {
+                    b.to_async(rt).iter(|| async {
+                        system_shutdown(&anvil_result.api, anvil_result.transaction.clone()).await
+                    })
+                });
+            },
+            "reth" => {
+                let anvil_result = rt.block_on(async { spawn_ethers_reth().await.unwrap() });
+                group.bench_with_input(BenchmarkId::new("Shutdown", "reth"), &rt, |b, rt| {
+                    b.to_async(rt).iter(|| async {
+                        system_shutdown(&anvil_result.api, anvil_result.transaction.clone()).await
+                    })
+                });
+            },
+            _ => panic!("Unknown method"),
+        }
+    }
+    group.finish();
+}
+
+pub fn benchmark_startups(c: &mut Criterion) {
+    let mut group = c.benchmark_group("startups");
+    let rt = Runtime::new().unwrap();
+
+    group.throughput(Throughput::Elements(1));
+    group.plot_config(PlotConfiguration::default().summary_scale(AxisScale::Logarithmic));
+
+    for method in ["ipc", "http_local", "reth"].iter() {
+        match *method {
+            "ipc" => {
+                group.bench_with_input(BenchmarkId::new("Startup", "ipc"), &rt, |b, rt| {
+                    b.to_async(rt).iter(|| async {
+                        spawn_ipc().await.unwrap();
+                    })
+                });
+            },
+            "http_local" => {
+                group.bench_with_input(BenchmarkId::new("Startup", "http_local"), &rt, |b, rt| {
+                    b.to_async(rt).iter(|| async {
+                        spawn_http_local().await.unwrap();
+                    })
+                });
+            },
+            "reth" => {
+                group.bench_with_input(BenchmarkId::new("Startup", "reth"), &rt, |b, rt| {
+                    b.to_async(rt).iter(|| async {
+                        spawn_ethers_reth().await.unwrap();
+                    })
+                });
+            },
+            _ => panic!("Unknown method"),
+        }
+    }
+    group.finish();
+}
+
+pub fn benchmark_startup_and_shutdown(c: &mut Criterion) {
+    let mut group = c.benchmark_group("startup_and_shutdown");
+    let rt = Runtime::new().unwrap();
+
+    group.throughput(Throughput::Elements(1));
+    group.plot_config(PlotConfiguration::default().summary_scale(AxisScale::Logarithmic));
+
+    for method in ["ipc", "http_local", "reth"].iter() {
+        match *method {
+            "ipc" => {
+                group.bench_with_input(BenchmarkId::new("Startup_and_Shutdown", "ipc"), &rt, |b, rt| {
+                    b.to_async(rt).iter(|| async {
+                        let anvil_result = spawn_ipc().await.unwrap();
+                        system_shutdown(&anvil_result.api, anvil_result.transaction.clone()).await;
+                    })
+                });
+            },
+            "http_local" => {
+                group.bench_with_input(BenchmarkId::new("Startup_and_Shutdown", "http_local"), &rt, |b, rt| {
+                    b.to_async(rt).iter(|| async {
+                        let anvil_result = spawn_http_local().await.unwrap();
+                        system_shutdown(&anvil_result.api, anvil_result.transaction.clone()).await;
+                    })
+                });
+            },
+            "reth" => {
+                group.bench_with_input(BenchmarkId::new("Startup_and_Shutdown", "reth"), &rt, |b, rt| {
+                    b.to_async(rt).iter(|| async {
+                        let anvil_result = spawn_ethers_reth().await.unwrap();
+                        system_shutdown(&anvil_result.api, anvil_result.transaction.clone()).await;
+                    })
+                });
+            },
+            _ => panic!("Unknown method"),
+        }
+    }
+    group.finish();
+}
+
+criterion_group!(benches, benchmark_startups, benchmark_shutdowns, benchmark_startup_and_shutdown);
 criterion_main!(benches);
