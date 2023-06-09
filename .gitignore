@@ -16,6 +16,10 @@ Cargo.lock
 
 # Added by cargo
 
-/target
+# Ignore everything in the target directory
+/target/*
+
+# But don't ignore the target/criterion directory
+!/target/criterion/
 
 .env
