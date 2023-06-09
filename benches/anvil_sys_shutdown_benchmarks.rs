@@ -139,7 +139,7 @@ pub fn benchmarks(c: &mut Criterion) {
     for (spawn_func, description) in spawn_funcs.iter() {
         let spawn_func = spawn_func.clone();
 
-        group.bench_function(BenchmarkId::new("Shutdown", description), move |b| {
+        group.sample_size(500).bench_function(BenchmarkId::new("Shutdown", description), move |b| {
             b.iter(|| {
                 let rt = Runtime::new().unwrap();
                 let spawn_func = spawn_func.clone();
