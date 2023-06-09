@@ -149,7 +149,7 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
         .with_steps_tracing(false)
         .with_tracing(false)
         .silent()
-        .fork_compute_units_per_second(Some(250))
+        .fork_compute_units_per_second(Some(100))
         .fork_request_retries(Some(12))
         .fork_request_timeout(Some(Duration::from_millis(50000)));
 
