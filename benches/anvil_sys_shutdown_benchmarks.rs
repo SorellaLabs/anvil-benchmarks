@@ -56,7 +56,7 @@ async fn spawn_http_local() -> Result<SpawnResult, Box<dyn Error>> {
     spawn_http(true).await
 }
 
-async fn spawn_http_external() -> Result<SpawnResult, Box<dyn Error>> {
+async fn spawn_http_remote() -> Result<SpawnResult, Box<dyn Error>> {
     spawn_http(false).await
 }
 
@@ -109,9 +109,8 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
         .with_steps_tracing(false)
         .with_tracing(false)
         .silent()
-        .fork_compute_units_per_second(Some(100))
-        .fork_request_retries(Some(12))
-        .fork_request_timeout(Some(Duration::from_millis(50000)));
+        .fork_compute_units_per_second(Some(1700))
+        .fork_request_timeout(Some(Duration::from_millis(45000)));
 
     spawn_with_config(config).await
 }
@@ -139,7 +138,7 @@ pub fn benchmarks(c: &mut Criterion) {
     for (spawn_func, description) in spawn_funcs.iter() {
         let spawn_func = spawn_func.clone();
 
-        group.sample_size(500).bench_function(BenchmarkId::new("Shutdown", description), move |b| {
+        group.sample_size(1).bench_function(BenchmarkId::new("Shutdown", description), move |b| {
             b.iter(|| {
                 let rt = Runtime::new().unwrap();
                 let spawn_func = spawn_func.clone();
@@ -156,6 +155,27 @@ pub fn benchmarks(c: &mut Criterion) {
             })
         });
     }
+
+
+    // Special case for HTTP Remote due to rate limiting.
+    let spawn_http_remote = || Box::pin(async { spawn_http_external().await.unwrap() });
+    group.sample_size(2).bench_function(BenchmarkId::new("Shutdown", "HTTP Remote"), move |b| {
+        b.iter(|| {
+            let rt = Runtime::new().unwrap();
+            let spawn_func = spawn_http_remote.clone();
+
+            rt.block_on(async {
+                // Spawn a new node with the appropriate configuration
+                let anvil_result = spawn_func().await;
+                let api = &anvil_result.api;
+                let provider = anvil_result.provider.clone();
+
+                // system_shutdown is called multiple times, but the node is the same
+                system_shutdown(api, provider.clone()).await
+            })
+        })
+    });
+
 
     group.finish();
 }
