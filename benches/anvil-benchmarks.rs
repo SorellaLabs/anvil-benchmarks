@@ -156,5 +156,5 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
     spawn_with_config(config).await
 }
 
-criterion_group!(benches, benchmark_ipc, benchmark_http_local, benchmark_http, benchmark_reth);
+criterion_group!(benches, benchmark_ipc, benchmark_http_local, benchmark_reth);
 criterion_main!(benches);
