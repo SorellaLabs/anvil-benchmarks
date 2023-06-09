@@ -146,18 +146,19 @@ pub fn benchmarks(c: &mut Criterion) {
     for (spawn_func, description) in spawn_funcs.iter() {
         // Spawn a new node with the appropriate configuration
         let anvil_result = spawn_func();
+        let api = &anvil_result.api;
+        let provider = anvil_result.provider.clone();
 
         // Benchmark system_shutdown
         group.bench_function(BenchmarkId::new("Shutdown", description), |b| {
             b.to_async(Runtime::new().unwrap()).iter(|| async {
                 // system_shutdown is called multiple times, but the node is the same
-                system_shutdown(&anvil_result.api, anvil_result.provider.clone()).await
+                system_shutdown(api, provider.clone()).await
             })
         });
     }
 
     group.finish();
 }
-
 criterion_group!(benches, benchmarks);
 criterion_main!(benches);
