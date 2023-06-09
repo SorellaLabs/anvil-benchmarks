@@ -26,8 +26,13 @@ criterion = { version = "0.5.1", features = ["async_tokio"] }
 
 
 [[bench]]
-name = "anvil-benchmarks"
+name = "anvil_sys_shutdown_benchmarks"
 harness = false
+
+#[[bench]]
+#name = "anvil_block_mine_benchmarks"
+#harness = false
+
 
 
 

@@ -1,14 +1,16 @@
 mod bindings;
-use std::sync::Arc;
-use std::time::Instant;
+use std::{sync::Arc, time::Instant};
 
 use anvil::{eth::EthApi, spawn, NodeConfig, NodeHandle};
 use bindings::convex::ShutdownSystemCall;
 use ethers::{abi::AbiEncode, prelude::*};
 use ndarray::Array1;
 use ndarray_stats::QuantileExt;
-use std::{env, future::Future};
-use std::sync::atomic::{AtomicU8, Ordering};
+use std::{
+    env,
+    future::Future,
+    sync::atomic::{AtomicU8, Ordering},
+};
 
 const GAS: u64 = 28_000_000;
 static TRACE_COUNT: AtomicU8 = AtomicU8::new(0);
@@ -121,7 +123,6 @@ async fn spawn_http_local(
     spawn_http(true).await
 }
 
-
 async fn spawn_http_external(
 ) -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>> {
     spawn_http(false).await
@@ -154,7 +155,6 @@ async fn spawn_http(
 
     spawn_with_config(config).await
 }
-
 
 async fn spawn_ipc() -> Result<(Arc<Provider<Ipc>>, EthApi, NodeHandle), Box<dyn std::error::Error>>
 {
