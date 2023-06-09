@@ -8,6 +8,7 @@ use anvil::{eth::EthApi, spawn, NodeConfig};
 use ethers::{abi::AbiEncode, prelude::*};
 use std::{env, sync::Arc};
 use tokio::runtime::Runtime;
+use tokio::time::Duration;
 
 const GAS: u64 = 28_000_000;
 struct SpawnResult {
@@ -149,7 +150,9 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
         .with_steps_tracing(false)
         .with_tracing(false)
         .silent()
-        .fork_compute_units_per_second(Some(330));
+        .fork_compute_units_per_second(Some(330))
+        .fork_request_retries(Some(5))
+        .fork_request_timeout(Some(Duration::from_millis(4500)));
 
     spawn_with_config(config).await
 }
