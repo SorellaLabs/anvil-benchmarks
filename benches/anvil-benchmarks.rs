@@ -148,7 +148,8 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
         .no_storage_caching()
         .with_steps_tracing(false)
         .with_tracing(false)
-        .silent();
+        .silent()
+        .fork_compute_units_per_second(Some(330));
 
     spawn_with_config(config).await
 }
