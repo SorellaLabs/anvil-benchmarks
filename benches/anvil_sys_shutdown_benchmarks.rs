@@ -118,21 +118,21 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
 
 
 pub fn benchmarks(c: &mut Criterion) {
-    let mut group = c.benchmark_group("AnvilShutdown");
+    let mut group = c.benchmark_group("Convex system shutdown simulation using anvil");
 
     // An array of async functions that spawn nodes with different configurations
     let spawn_funcs: [(fn() -> Pin<Box<dyn Future<Output = SpawnResult>>>, &str); 3] = [
         (
             || Box::pin(async { spawn_http_local().await.unwrap() }),
-            "HTTP Local",
+            "Local Http",
         ),
         (
             || Box::pin(async { spawn_ipc().await.unwrap() }),
-            "IPC",
+            "Ipc",
         ),
         (
             || Box::pin(async { spawn_ethers_reth().await.unwrap() }),
-            "RETH",
+            "ethers-reth middleware",
         ),
     ];
 
