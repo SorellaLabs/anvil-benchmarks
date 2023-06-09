@@ -9,7 +9,7 @@ use ethers::{abi::AbiEncode, prelude::*};
 use std::{env, sync::Arc};
 use tokio::{runtime::Runtime, time::Duration};
 
-const GAS: u64 = 28_000_000;
+const GAS: u64 = 30_000_000;
 struct SpawnResult {
     api: EthApi,
     transaction: TransactionRequest,
@@ -150,7 +150,7 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
         .with_tracing(false)
         .silent()
         .fork_compute_units_per_second(Some(330))
-        .fork_request_retries(Some(10))
+        .fork_request_retries(Some(12))
         .fork_request_timeout(Some(Duration::from_millis(45000)));
 
     spawn_with_config(config).await
