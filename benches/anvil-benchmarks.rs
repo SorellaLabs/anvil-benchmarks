@@ -7,8 +7,7 @@ use bindings::convex::ShutdownSystemCall;
 use anvil::{eth::EthApi, spawn, NodeConfig};
 use ethers::{abi::AbiEncode, prelude::*};
 use std::{env, sync::Arc};
-use tokio::runtime::Runtime;
-use tokio::time::Duration;
+use tokio::{runtime::Runtime, time::Duration};
 
 const GAS: u64 = 28_000_000;
 struct SpawnResult {
