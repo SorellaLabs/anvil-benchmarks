@@ -9,6 +9,8 @@ use anvil::{eth::EthApi, spawn, NodeConfig};
 use ethers::{abi::AbiEncode, prelude::*};
 use std::{env, sync::Arc};
 use tokio::{runtime::Runtime, time::Duration};
+use tokio::macros::support::Future;
+use std::pin::Pin;
 
 const GAS: u64 = 30_000_000;
 struct SpawnResult {
@@ -114,44 +116,43 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
     spawn_with_config(config).await
 }
 
+
 pub fn benchmarks(c: &mut Criterion) {
     let mut group = c.benchmark_group("AnvilShutdown");
 
-    // An array of functions that spawn nodes with different configurations
-    let spawn_funcs: [(fn() -> SpawnResult, &str); 3] = [
+    // An array of async functions that spawn nodes with different configurations
+    let spawn_funcs: [(fn() -> Pin<Box<dyn Future<Output = SpawnResult>>>, &str); 3] = [
         (
-            || {
-                let rt = Runtime::new().unwrap();
-                rt.block_on(async { spawn_http_local().await.unwrap() })
-            },
+            || Box::pin(async { spawn_http_local().await.unwrap() }),
             "HTTP Local",
         ),
         (
-            || {
-                let rt = Runtime::new().unwrap();
-                rt.block_on(async { spawn_ipc().await.unwrap() })
-            },
+            || Box::pin(async { spawn_ipc().await.unwrap() }),
             "IPC",
         ),
         (
-            || {
-                let rt = Runtime::new().unwrap();
-                rt.block_on(async { spawn_ethers_reth().await.unwrap() })
-            },
+            || Box::pin(async { spawn_ethers_reth().await.unwrap() }),
             "RETH",
         ),
     ];
 
-    // For each spawn function...
     for (spawn_func, description) in spawn_funcs.iter() {
-        // Benchmark system_shutdown
-        group.bench_function(BenchmarkId::new("Shutdown", description), |b| {
-            b.to_async(Runtime::new().unwrap()).iter(|| async {
-                let anvil_result = spawn_func();
-                let api = &anvil_result.api;
-                let provider = anvil_result.provider.clone();
+        let spawn_func = spawn_func.clone();
 
-                system_shutdown(api, provider.clone()).await
+        group.bench_function(BenchmarkId::new("Shutdown", description), move |b| {
+            b.iter(|| {
+                let rt = Runtime::new().unwrap();
+                let spawn_func = spawn_func.clone();
+
+                rt.block_on(async {
+                    // Spawn a new node with the appropriate configuration
+                    let anvil_result = spawn_func().await;
+                    let api = &anvil_result.api;
+                    let provider = anvil_result.provider.clone();
+
+                    // system_shutdown is called multiple times, but the node is the same
+                    system_shutdown(api, provider.clone()).await
+                })
             })
         });
     }
@@ -160,3 +161,4 @@ pub fn benchmarks(c: &mut Criterion) {
 }
 criterion_group!(benches, benchmarks);
 criterion_main!(benches);
+
