@@ -134,11 +134,7 @@ pub fn benchmarks(c: &mut Criterion) {
                 rt.block_on(async {
                     // Spawn a new node with the appropriate configuration
                     let anvil_result = spawn_func().await;
-                    let api = &anvil_result.api;
-                    let provider = anvil_result.provider.clone();
-
-                    // system_shutdown is called multiple times, but the node is the same
-                    system_shutdown(api, provider.clone()).await
+                    system_shutdown(&anvil_result.api, anvil_result.provider.clone()).await
                 })
             })
         });
