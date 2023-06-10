@@ -138,7 +138,7 @@ pub fn benchmarks(c: &mut Criterion) {
     for (spawn_func, description) in spawn_funcs.iter() {
         let spawn_func = spawn_func.clone();
 
-        group.sample_size(1).bench_function(BenchmarkId::new("Shutdown", description), move |b| {
+        group.sample_size(15).bench_function(BenchmarkId::new("Shutdown", description), move |b| {
             b.iter(|| {
                 let rt = Runtime::new().unwrap();
                 let spawn_func = spawn_func.clone();
@@ -158,8 +158,8 @@ pub fn benchmarks(c: &mut Criterion) {
 
 
     // Special case for HTTP Remote due to rate limiting.
-    let spawn_http_remote = || Box::pin(async { spawn_http_external().await.unwrap() });
-    group.sample_size(2).bench_function(BenchmarkId::new("Shutdown", "HTTP Remote"), move |b| {
+    let spawn_http_remote = || Box::pin(async { spawn_http_remote().await.unwrap() });
+    group.sample_size(10).bench_function(BenchmarkId::new("Shutdown", "HTTP Remote"), move |b| {
         b.iter(|| {
             let rt = Runtime::new().unwrap();
             let spawn_func = spawn_http_remote.clone();
