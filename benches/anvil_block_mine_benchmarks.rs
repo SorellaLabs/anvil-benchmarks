@@ -1,11 +1,7 @@
 // in this bench I want to send a blocks worth of transaction & see how long it takes the node to
 // mine it
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-
 use std::error::Error;
-
-mod bindings;
-use bindings::convex::ShutdownSystemCall;
 
 use anvil::{eth::EthApi, spawn, NodeConfig};
 use ethers::{abi::AbiEncode, prelude::*};
@@ -102,7 +98,8 @@ async fn spawn_ipc() -> Result<SpawnResult, Box<dyn Error>> {
         .no_storage_caching()
         .with_steps_tracing(false)
         .with_tracing(false)
-        .silent();
+        .silent()
+        .with_no_mining(true);
 
     spawn_with_config(config).await
 }
@@ -120,7 +117,8 @@ async fn spawn_ethers_reth() -> Result<SpawnResult, Box<dyn Error>> {
         .no_storage_caching()
         .with_steps_tracing(false)
         .with_tracing(false)
-        .silent();
+        .silent()
+        .with_no_mining(true);
 
     spawn_with_config(config).await
 }
@@ -142,7 +140,8 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
         .with_tracing(false)
         .silent()
         .fork_compute_units_per_second(Some(300))
-        .fork_request_timeout(Some(Duration::from_millis(1000000)));
+        .fork_request_timeout(Some(Duration::from_millis(1000000)))
+        .with_no_mining(true);
 
     spawn_with_config(config).await
 }
@@ -157,6 +156,10 @@ pub fn benchmarks(c: &mut Criterion) {
         (|| Box::pin(async { spawn_ethers_reth().await.unwrap() }), "ethers-reth middleware"),
     ];
 
+    // Fetch the blocks from the csv
+    // add clap 
+    let blocks = get_blocks();
+
     for (spawn_func, description) in spawn_funcs.iter() {
         let spawn_func = spawn_func.clone();
 
@@ -164,7 +167,7 @@ pub fn benchmarks(c: &mut Criterion) {
             b.iter(|| {
                 let rt = Runtime::new().unwrap();
                 let spawn_func = spawn_func.clone();
-
+            
                 rt.block_on(async {
                     // Spawn a new node with the appropriate configuration
                     let anvil_result = spawn_func().await;
