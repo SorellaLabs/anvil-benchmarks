@@ -107,8 +107,8 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
         .with_steps_tracing(false)
         .with_tracing(false)
         .silent()
-        .fork_compute_units_per_second(Some(2700))
-        .fork_request_timeout(Some(Duration::from_millis(85000)));
+        .fork_compute_units_per_second(Some(300))
+        .fork_request_timeout(Some(Duration::from_millis(100000)));
 
     spawn_with_config(config).await
 }
