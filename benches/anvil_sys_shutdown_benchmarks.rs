@@ -7,10 +7,8 @@ use bindings::convex::ShutdownSystemCall;
 
 use anvil::{eth::EthApi, spawn, NodeConfig};
 use ethers::{abi::AbiEncode, prelude::*};
-use std::{env, sync::Arc};
-use tokio::{runtime::Runtime, time::Duration};
-use tokio::macros::support::Future;
-use std::pin::Pin;
+use std::{env, pin::Pin, sync::Arc};
+use tokio::{macros::support::Future, runtime::Runtime, time::Duration};
 
 const GAS: u64 = 30_000_000;
 struct SpawnResult {
@@ -109,30 +107,20 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
         .with_steps_tracing(false)
         .with_tracing(false)
         .silent()
-        .fork_compute_units_per_second(Some(1700))
-        .fork_request_timeout(Some(Duration::from_millis(45000)));
+        .fork_compute_units_per_second(Some(2700))
+        .fork_request_timeout(Some(Duration::from_millis(85000)));
 
     spawn_with_config(config).await
 }
-
 
 pub fn benchmarks(c: &mut Criterion) {
     let mut group = c.benchmark_group("Convex system shutdown simulation using anvil");
 
     // An array of async functions that spawn nodes with different configurations
     let spawn_funcs: [(fn() -> Pin<Box<dyn Future<Output = SpawnResult>>>, &str); 3] = [
-        (
-            || Box::pin(async { spawn_http_local().await.unwrap() }),
-            "Local Http",
-        ),
-        (
-            || Box::pin(async { spawn_ipc().await.unwrap() }),
-            "Ipc",
-        ),
-        (
-            || Box::pin(async { spawn_ethers_reth().await.unwrap() }),
-            "ethers-reth middleware",
-        ),
+        (|| Box::pin(async { spawn_http_local().await.unwrap() }), "Local Http"),
+        (|| Box::pin(async { spawn_ipc().await.unwrap() }), "Ipc"),
+        (|| Box::pin(async { spawn_ethers_reth().await.unwrap() }), "ethers-reth middleware"),
     ];
 
     for (spawn_func, description) in spawn_funcs.iter() {
@@ -156,7 +144,6 @@ pub fn benchmarks(c: &mut Criterion) {
         });
     }
 
-
     // Special case for HTTP Remote due to rate limiting.
     let spawn_http_remote = || Box::pin(async { spawn_http_remote().await.unwrap() });
     group.sample_size(10).bench_function(BenchmarkId::new("Shutdown", "HTTP Remote"), move |b| {
@@ -167,18 +154,12 @@ pub fn benchmarks(c: &mut Criterion) {
             rt.block_on(async {
                 // Spawn a new node with the appropriate configuration
                 let anvil_result = spawn_func().await;
-                let api = &anvil_result.api;
-                let provider = anvil_result.provider.clone();
-
-                // system_shutdown is called multiple times, but the node is the same
-                system_shutdown(api, provider.clone()).await
+                system_shutdown(&anvil_result.api, anvil_result.provider.clone()).await
             })
         })
     });
-
 
     group.finish();
 }
 criterion_group!(benches, benchmarks);
 criterion_main!(benches);
-
