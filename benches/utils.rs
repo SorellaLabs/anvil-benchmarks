@@ -247,7 +247,7 @@ pub mod system_shutdown {
             .with_tracing(false)
             .silent()
             .fork_compute_units_per_second(Some(2700))
-            .fork_request_timeout(Some(Duration::from_millis(65000)));
+            .fork_request_timeout(Some(Duration::from_millis(85000)));
 
         spawn_with_config(config).await
     }
