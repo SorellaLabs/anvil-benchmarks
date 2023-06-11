@@ -16,6 +16,11 @@ impl SpawnResult {
 }
 
 pub mod block_simulation {
+    use std::{collections::HashMap, str::FromStr};
+
+    use csv::ReaderBuilder;
+    use ethers::utils::parse_ether;
+
     use super::*;
 
     pub struct Block {
@@ -28,8 +33,78 @@ pub mod block_simulation {
         }
     }
 
-    pub fn get_blocks() -> Vec<Block> {
-        return Vec::new()
+    pub fn get_blocks(start_block: u64, end_block: u64) -> Vec<Block> {
+        let mut blocks = Vec::new();
+        for i in start_block..end_block+1 {
+            blocks.push(get_block(i))
+        }
+        blocks
+    }
+
+    pub fn into_tx_request(row: Vec<String>) -> TransactionRequest {
+    
+        let data = match row[7].as_str() {
+            "" | "0" | "0x" => vec![],
+            _ => hex::decode(&row[7][2..]).unwrap(),
+        };
+    
+        TransactionRequest { 
+            from: Some(H160::from_str(&row[1][2..]).unwrap()), 
+            to: Some(NameOrAddress::Name((row[2].clone()))), 
+            gas: row[3].parse::<U256>().ok(),
+            gas_price: parse_gas_price(&row[4]),
+            value: parse_ether(&row[6]).ok(),
+            data: Some(Bytes::from(data)),
+            nonce: row[5].parse::<U256>().ok(), 
+            chain_id: Some(U64::from_dec_str("1").unwrap())
+        }
+    }
+    
+    
+    pub fn get_block(block_number: u64) -> Block {
+
+        let block_times: HashMap<u64, u64> = [
+            (17200000, 1683357287), 
+            (17200001, 1683357299), 
+            (17200002, 1683357311), 
+            (17200003, 1683357323), 
+            (17200004, 1683357335), 
+            (17200005, 1683357347), 
+            (17200006, 1683357359), 
+            (17200007, 1683357371), 
+            (17200008, 1683357383), 
+            (17200009, 1683357395), 
+            (17200010, 1683357407)
+        ].iter().cloned().collect();
+
+        let mut reader = ReaderBuilder::new()
+            .delimiter(b',')
+            .quote(b'"')
+            .double_quote(true)
+            .escape(None)
+            .terminator(csv::Terminator::Any(b'\n'))
+            .flexible(true)
+            .from_path(env::var("10_BLOCKS_PATH").expect("ETH_IPC_PATH not found in .env"))
+            .unwrap();
+    
+        let mut txs: Vec<TransactionRequest> = Vec::new();
+        for row in reader.records() {
+            let res = row.unwrap().deserialize::<Vec<String>>(None).unwrap();
+            let timestamp: f64 = res[8].parse().unwrap();
+            if  timestamp >= *block_times.get(&(block_number-1)).unwrap() as f64 && timestamp > *block_times.get(&block_number).unwrap() as f64 {
+                txs.push(into_tx_request(res));
+            }
+        }
+        
+        Block::new(txs)
+    }
+    
+    fn parse_gas_price(price: &str) -> Option<U256> {
+        if price == "" {
+            None
+        } else {
+            Some(U256::from_dec_str(&price).unwrap())
+        }
     }
 
     pub async fn spawn_with_config(config: NodeConfig) -> Result<SpawnResult, Box<dyn Error>> {
