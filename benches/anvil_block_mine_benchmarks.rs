@@ -37,7 +37,7 @@ pub fn benchmarks(c: &mut Criterion) {
     let blocks = get_blocks();
 
     for (spawn_func, description) in &spawn_funcs {
-        group.bench_function(format!("All blocks - {}", description), |b| {
+        group.sample_size(10).bench_function(format!("All blocks - {}", description), |b| {
             b.iter(|| {
                 let rt = Runtime::new().unwrap();
                 let spawn_func = spawn_func.clone();
@@ -52,7 +52,7 @@ pub fn benchmarks(c: &mut Criterion) {
         for (i, block) in blocks.iter().enumerate() {
             let spawn_func = spawn_func.clone();
 
-            group.bench_with_input(
+            group.sample_size(10).bench_with_input(
                 BenchmarkId::new(format!("Block {} - {}", i, description), i),
                 block,
                 |b, block| {
