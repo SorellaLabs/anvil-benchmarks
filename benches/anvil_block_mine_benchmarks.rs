@@ -1,9 +1,8 @@
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 
 use anvil::eth::EthApi;
-use std::pin::Pin;
+use std::{env, pin::Pin};
 use tokio::{macros::support::Future, runtime::Runtime};
-
 mod utils;
 use crate::utils::{
     block_simulation::{Block, *},
@@ -34,10 +33,14 @@ pub fn benchmarks(c: &mut Criterion) {
 
     let spawn_http_remote = || Box::pin(async { spawn_http_remote().await.unwrap() });
 
-    let blocks = get_blocks(17200001, 17200010);
+    // Create a new runtime for the async task
+    let mut rt = tokio::runtime::Runtime::new().unwrap();
+
+    let provider = rt.block_on(spawn_ipc_provider());
+    let blocks = rt.block_on(get_blocks(provider, 14556786, 14556795));
 
     for (spawn_func, description) in &spawn_funcs {
-        group.sample_size(10).bench_function(format!("All blocks - {}", description), |b| {
+        group.sample_size(1000).bench_function(format!("All blocks - {}", description), |b| {
             b.iter(|| {
                 let rt = Runtime::new().unwrap();
                 let spawn_func = spawn_func.clone();
@@ -52,7 +55,7 @@ pub fn benchmarks(c: &mut Criterion) {
         for (i, block) in blocks.iter().enumerate() {
             let spawn_func = spawn_func.clone();
 
-            group.sample_size(10).bench_with_input(
+            group.sample_size(1000).bench_with_input(
                 BenchmarkId::new(format!("Block {} - {}", i, description), i),
                 block,
                 |b, block| {
@@ -70,7 +73,7 @@ pub fn benchmarks(c: &mut Criterion) {
         }
     }
 
-    group.sample_size(10).bench_function("All blocks - HTTP Remote", |b| {
+    /*group.sample_size(10).bench_function("All blocks - HTTP Remote", |b| {
         b.iter(|| {
             let rt = Runtime::new().unwrap();
 
@@ -96,7 +99,7 @@ pub fn benchmarks(c: &mut Criterion) {
                 });
             },
         );
-    }
+    }*/
 
     group.finish();
 }
