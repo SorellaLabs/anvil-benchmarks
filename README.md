@@ -1,39 +1,53 @@
-![Convex system shutdown simulation](/target/criterion/Convex%20system%20shutdown%20simulation%20using%20anvil/report/violin.svg)
+![Race of the forks](/assets/RaceOfTheForks.png)
 
-# Anvil systemShutdown provider benchmarks
+# Anvil provider benchmarks
 
-This repository benchmarks the performance of various anvil providers by simulating a call to Convex's systemShutdown method (a method that typically requires a substantial amount of gas and performs numerous token transfers).
+This repository benchmarks Anvil providers by running Ethereum block simulations and invoking the systemShutdown method from Convex Finance, known for high gas consumption and multiple token transfers.
 
 ## Background
 
-The IPC and Ethers Reth middleware functionality has been developed by Sorella Labs for our back-testing needs. Our hope is to contribute these developments to foundry in the near future.
+The Ipc and Ethers Reth middleware functionality has been developed by Sorella Labs for our back-testing needs. Our hope is to contribute these developments to foundry in the near future.
+
+## Benchmarks
+
+The repository contains the following benchmarks:
+
+1. **Convex Finance System Shutdown Simulation**: This benchmark simulates the system shutdown of the Convex Finance protocol.
+
+2. **Block Simulation Benchmark**: This benchmark replicates the execution of Ethereum blocks as both a standalone block simulation & sequence block simulation.
 
 ## Methodology
 
-Benchmarks were run at mainnet block 14,445,961. The benchmarks were conducted using various providers such as Local HTTP, QuickNode HTTP, Infura HTTP, Reth-Ipc, and Ethers-Reth.
+The benchmarking procedure uses Criterion.rs, a Rust benchmarking library, and is conducted in the following manner:
 
-1. **No Storage Caching:** Storage caching was disabled to accurately measure the pure performance of the different providers.
-2. **Cache Flush:** After each run, the cache was flushed to ensure that subsequent runs start with a clean slate.
-3. **Performance Metrics:** For each provider, the Mean Duration, Standard Deviation of Duration, Minimum Duration, and Maximum Duration were measured and recorded.
-4. **Environment:** All benchmarks were run on a AWS i3en.3xlarge instance (12 vCPUs and 96 GB of RAM).
+1. **Convex Finance System Shutdown Simulation**: Each test begins by warming up the CPU and filling up the cache by repeatedly executing the benchmark function. Then, a system shutdown operation for the Convex Finance protocol is simulated using various Anvil provider configurations. Each operation is timed and the results are logged.
+
+2. **Single Block Simulation**: For each Ethereum block to be simulated, the function is executed in the same way as the system shutdown operation. Each transaction within the block is executed and mined one at a time.
+
+3. **Sequential Block Simulation**: The same procedure as the single block simulation is repeated, but for a sequence of Ethereum blocks. Here, each block and its transactions are executed and mined in sequence.
+
+For all stages, the logged times are statistically analyzed using Criterion.rs. Results are categorized using a version of Tukey's Method and a linear regression generates a confidence interval. Performance changes are identified by comparing current results to previous ones.
+
+The benchmark tests are conducted on an AWS is4gen.2xlarge instance at a specific Ethereum mainnet block with various providers. Storage caching is disabled and cache is cleared after each run for accurate performance measurements.
 
 ## Results
 
-| Anvil Providers | Mean Duration | Std Dev Duration | Min Duration | Max Duration |
-| --------------- | ------------- | ---------------- | ------------ | ------------ |
-| Local HTTP      | XX.XXXs       | XX.XXXs          | XX.XXXs      | XX.XXXs      |
-| QuickNode HTTP  | XX.XXXs       | XX.XXXs          | XX.XXXs      | XX.XXXs      |
-| Infura HTTP     | XX.XXXs       | XX.XXXs          | XX.XXXs      | XX.XXXs      |
-| Reth-Ipc        | XX.XXXs       | XX.XXXs          | XX.XXXs      | XX.XXXs      |
-| Ethers-Reth     | XX.XXXs       | XX.XXXs          | XX.XXXs      | XX.XXXs      |
+## Setup
 
-## Conclusion:
+You will need Rust and Cargo installed to run these benchmarks. You can install Rust by following the instructions [here](https://www.rust-lang.org/tools/install).
 
-From the obtained results, it can be observed that (insert your conclusion here based on your findings)
+Next, clone the repository and navigate to the root directory:
 
-It's important to note that performance can vary depending on various factors such as network latency, server load, etc. These benchmarks provide a general idea of the performance capabilities of different Anvil Providers and can be used as a starting point for performance tuning and optimization.
+```
+git clone https://github.com/AnvilEthereum/anvil-benchmarks.git
+cd anvil-benchmarks
+```
 
-## Usage
+Note: Running these benchmarks requires a local Reth archive node.
+
+## Running Benchmarks
+
+Once you have the necessary prerequisites installed and cloned the repository, you can run the benchmarks.
 
 1. Copy the template for the environment variables configuration:
 
@@ -43,19 +57,37 @@ cp .env.example .env
 
 In the resulting `.env` file, fill out the following fields:
 
-- `ETH_RPC_URL`: This should be a URL to an Ethereumta, and archive node. Alchemy provides free archive node da you can set up a node at [Alchemy](https://www.alchemy.com/).
-- `ETH_IPC_PATH`: Ipc path to local node
-- `ETH_DB_PATH`: Reth db path to local archive node
+- `ETH_RPC_URL`: This should be a URL to an Ethereum archive node.
+- `ETH_RPC_URL_LOCAL`: This should be a URL to your local Ethereum node.
+- `ETH_IPC_PATH`: IPC path to the local node.
+- `ETH_DB_PATH`: Reth DB path to the local archive node.
 
-2. Run source .env to load the environment variables into your shell:
-
-3. Once you have your `.env` setup, you can run the benchmark script with the command:
+2. Load the environment variables into your shell:
 
 ```
-cargo run --release
+source .env
 ```
 
-This will output the mean, standard deviation, minimum, and maximum durations for the system shutdown call over a set number of iterations.
+3. Run the benchmarks:
+
+To run the Convex Finance System Shutdown benchmark:
+
+```
+cargo bench --bench anvil_sys_shutdown_benchmarks
+```
+
+To run the Block Simulation benchmark:
+
+```
+cargo bench --bench anvil_block_mine_benchmarks
+```
+
+## Reporting
+
+Benchmark results are displayed in the console. For more detailed statistics and insights, Criterion saves data in the target/criterion directory. Open the HTML report file for each benchmark in a web browser:
+
+- For the Convex Finance System Shutdown benchmark, open `target/criterion/Convex System Shutdown Simulation/report/index.html`.
+- For the Block Simulation benchmark, open `target/criterion/Block Simulation/report/index.html`.
 
 ## Contributions
 
@@ -64,5 +96,3 @@ Contributions to this project are welcome! If you have any suggestions or find a
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
-
-It looks like you're asking to update the README to accommodate for your specific benchmarking script and environment variables setup. Here's a possible revision:

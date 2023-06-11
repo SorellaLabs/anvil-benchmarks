@@ -32,13 +32,26 @@ pub fn benchmarks(c: &mut Criterion) {
         (|| Box::pin(async { spawn_ethers_reth().await.unwrap() }), "ethers-reth middleware"),
     ];
 
-    //
+    let spawn_http_remote = || Box::pin(async { spawn_http_remote().await.unwrap() });
+
     let blocks = get_blocks();
 
-    for (spawn_func, description) in spawn_funcs.iter() {
-        let spawn_func = spawn_func.clone();
+    for (spawn_func, description) in &spawn_funcs {
+        group.bench_function(format!("All blocks - {}", description), |b| {
+            b.iter(|| {
+                let rt = Runtime::new().unwrap();
+                let spawn_func = spawn_func.clone();
+
+                rt.block_on(async {
+                    let anvil_result = spawn_func().await;
+                    blocks_simulation(&blocks, &anvil_result.api).await;
+                })
+            });
+        });
 
         for (i, block) in blocks.iter().enumerate() {
+            let spawn_func = spawn_func.clone();
+
             group.bench_with_input(
                 BenchmarkId::new(format!("Block {} - {}", i, description), i),
                 block,
@@ -55,22 +68,18 @@ pub fn benchmarks(c: &mut Criterion) {
                 },
             );
         }
-
-        group.bench_function(format!("All blocks - {}", description), |b| {
-            b.iter(|| {
-                let rt = Runtime::new().unwrap();
-                let spawn_func = spawn_func.clone();
-
-                rt.block_on(async {
-                    let anvil_result = spawn_func().await;
-                    blocks_simulation(&blocks, &anvil_result.api).await;
-                })
-            });
-        });
     }
 
-    // Special case for HTTP Remote (less iterations due to rate limiting)
-    let spawn_http_remote = || Box::pin(async { spawn_http_remote().await.unwrap() });
+    group.sample_size(10).bench_function("All blocks - HTTP Remote", |b| {
+        b.iter(|| {
+            let rt = Runtime::new().unwrap();
+
+            rt.block_on(async {
+                let anvil_result = spawn_http_remote().await;
+                blocks_simulation(&blocks, &anvil_result.api).await;
+            })
+        })
+    });
 
     for (i, block) in blocks.iter().enumerate() {
         group.sample_size(10).bench_with_input(
@@ -79,28 +88,15 @@ pub fn benchmarks(c: &mut Criterion) {
             |b, block| {
                 b.iter(|| {
                     let rt = Runtime::new().unwrap();
-                    let spawn_func = spawn_http_remote.clone();
 
                     rt.block_on(async {
-                        let anvil_result = spawn_func().await;
+                        let anvil_result = spawn_http_remote().await;
                         block_simulation(block, &anvil_result.api).await;
                     })
                 });
             },
         );
     }
-
-    group.sample_size(10).bench_function("All blocks - HTTP Remote", |b| {
-        b.iter(|| {
-            let rt = Runtime::new().unwrap();
-            let spawn_func = spawn_http_remote.clone();
-
-            rt.block_on(async {
-                let anvil_result = spawn_func().await;
-                blocks_simulation(&blocks, &anvil_result.api).await;
-            })
-        })
-    });
 
     group.finish();
 }
