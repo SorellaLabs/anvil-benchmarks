@@ -84,7 +84,7 @@ pub mod block_simulation {
             .escape(None)
             .terminator(csv::Terminator::Any(b'\n'))
             .flexible(true)
-            .from_path(env::var("10_BLOCKS_PATH").expect("ETH_IPC_PATH not found in .env"))
+            .from_path(env::var("BLOCKS_CSV").expect("ETH_IPC_PATH not found in .env"))
             .unwrap();
     
         let mut txs: Vec<TransactionRequest> = Vec::new();

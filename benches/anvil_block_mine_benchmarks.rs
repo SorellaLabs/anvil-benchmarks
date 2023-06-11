@@ -34,7 +34,7 @@ pub fn benchmarks(c: &mut Criterion) {
 
     let spawn_http_remote = || Box::pin(async { spawn_http_remote().await.unwrap() });
 
-    let blocks = get_blocks();
+    let blocks = get_blocks(17200001, 17200010);
 
     for (spawn_func, description) in &spawn_funcs {
         group.sample_size(10).bench_function(format!("All blocks - {}", description), |b| {
