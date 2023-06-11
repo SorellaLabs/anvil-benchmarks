@@ -252,4 +252,4 @@ pub mod system_shutdown {
         spawn_with_config(config).await
     }
 }
-cargo criterion --bench anvil_sys_shutdown_benchmark --message-format=json > anvil_sys_shutdown_benchmark.json
+//cargo criterion --bench anvil_sys_shutdown_benchmark --message-format=json > anvil_sys_shutdown_benchmark.json
