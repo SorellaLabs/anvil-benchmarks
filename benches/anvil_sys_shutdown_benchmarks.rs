@@ -114,19 +114,19 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
 }
 
 pub fn benchmarks(c: &mut Criterion) {
-    let mut group = c.benchmark_group("Convex system shutdown simulation using anvil");
+    let mut group = c.benchmark_group("Convex system shutdown simulation");
 
     // An array of async functions that spawn nodes with different configurations
     let spawn_funcs: [(fn() -> Pin<Box<dyn Future<Output = SpawnResult>>>, &str); 3] = [
         (|| Box::pin(async { spawn_http_local().await.unwrap() }), "Local Http"),
         (|| Box::pin(async { spawn_ipc().await.unwrap() }), "Ipc"),
-        (|| Box::pin(async { spawn_ethers_reth().await.unwrap() }), "ethers-reth middleware"),
+        (|| Box::pin(async { spawn_ethers_reth().await.unwrap() }), "ethers-reth"),
     ];
 
     for (spawn_func, description) in spawn_funcs.iter() {
         let spawn_func = spawn_func.clone();
 
-        group.sample_size(15).bench_function(BenchmarkId::new("Shutdown", description), move |b| {
+        group.sample_size(15).bench_function(BenchmarkId::new("System shutdown", description), move |b| {
             b.iter(|| {
                 let rt = Runtime::new().unwrap();
                 let spawn_func = spawn_func.clone();
@@ -142,7 +142,7 @@ pub fn benchmarks(c: &mut Criterion) {
 
     // Special case for HTTP Remote due to rate limiting.
     let spawn_http_remote = || Box::pin(async { spawn_http_remote().await.unwrap() });
-    group.sample_size(10).bench_function(BenchmarkId::new("Shutdown", "HTTP Remote"), move |b| {
+    group.sample_size(10).bench_function(BenchmarkId::new("System shutdown", "HTTP Remote"), move |b| {
         b.iter(|| {
             let rt = Runtime::new().unwrap();
             let spawn_func = spawn_http_remote.clone();

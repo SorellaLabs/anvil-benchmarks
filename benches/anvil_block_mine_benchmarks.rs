@@ -4,7 +4,7 @@ use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use std::error::Error;
 
 use anvil::{eth::EthApi, spawn, NodeConfig};
-use ethers::{abi::AbiEncode, prelude::*};
+use ethers::prelude::*;
 use std::{env, pin::Pin, sync::Arc};
 use tokio::{macros::support::Future, runtime::Runtime, time::Duration};
 
@@ -37,7 +37,7 @@ pub fn get_txs(block_number: u64) -> Vec<TransactionRequest> {
     txs
 }
 
-pub fn get_block(start_block: u64, end_block: u64) -> Vec<Block> {
+pub fn get_block() -> Vec<Block> {
     let mut blocks = Vec::new();
     for block_number in start_block..end_block {
         let block = Block::new();
@@ -147,7 +147,7 @@ async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
 }
 
 pub fn benchmarks(c: &mut Criterion) {
-    let mut group = c.benchmark_group("Convex system shutdown simulation using anvil");
+    let mut group = c.benchmark_group("Block Simulation");
 
     // An array of async functions that spawn nodes with different configurations
     let spawn_funcs: [(fn() -> Pin<Box<dyn Future<Output = SpawnResult>>>, &str); 3] = [
@@ -171,7 +171,7 @@ pub fn benchmarks(c: &mut Criterion) {
                 rt.block_on(async {
                     // Spawn a new node with the appropriate configuration
                     let anvil_result = spawn_func().await;
-                    block_simulation(&anvil_result.api, anvil_result.provider.clone()).await
+                    block_simulation(&anvil_result.api, anvil_result.provider.clone()).await;
                 })
             })
         });
@@ -187,7 +187,7 @@ pub fn benchmarks(c: &mut Criterion) {
             rt.block_on(async {
                 // Spawn a new node with the appropriate configuration
                 let anvil_result = spawn_func().await;
-                system_shutdown(&anvil_result.api, anvil_result.provider.clone()).await
+                block_simulation(&anvil_result.api, anvil_result.provider.clone()).await;
             })
         })
     });
