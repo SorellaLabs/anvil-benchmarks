@@ -110,6 +110,7 @@ pub mod block_simulation {
     pub async fn spawn_with_config(config: NodeConfig) -> Result<SpawnResult, Box<dyn Error>> {
         let (api, handle) = spawn(config).await;
         let provider = Arc::new(Provider::<Ipc>::connect_ipc(handle.ipc_path().unwrap()).await?);
+        api.anvil_auto_impersonate_account(true).await.unwrap();
         Ok(SpawnResult::new(api, provider))
     }
     pub async fn spawn_http_local() -> Result<SpawnResult, Box<dyn Error>> {
@@ -185,6 +186,7 @@ pub mod system_shutdown {
     pub async fn spawn_with_config(config: NodeConfig) -> Result<SpawnResult, Box<dyn Error>> {
         let (api, handle) = spawn(config).await;
         let provider = Arc::new(Provider::<Ipc>::connect_ipc(handle.ipc_path().unwrap()).await?);
+        api.anvil_auto_impersonate_account(true).await.unwrap();
         Ok(SpawnResult::new(api, provider))
     }
     pub async fn spawn_http_local() -> Result<SpawnResult, Box<dyn Error>> {
