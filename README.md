@@ -1,4 +1,4 @@
-![Convex system shutdown simulation](target/criterion/Convex system shutdown simulation using anvil/report/violin.svg)
+![Convex system shutdown simulation](/target/criterion/Convex system shutdown simulation using anvil/report/violin.svg)
 
 # Anvil systemShutdown provider benchmarks
 
