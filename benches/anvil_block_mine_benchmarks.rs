@@ -1,8 +1,7 @@
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 
 use anvil::eth::EthApi;
-use ethers::prelude::*;
-use std::{pin::Pin, sync::Arc};
+use std::pin::Pin;
 use tokio::{macros::support::Future, runtime::Runtime};
 
 mod utils;
@@ -33,7 +32,7 @@ pub fn benchmarks(c: &mut Criterion) {
         (|| Box::pin(async { spawn_ethers_reth().await.unwrap() }), "ethers-reth middleware"),
     ];
 
-    // Assuming get_blocks() returns Vec<Block> and it's implemented elsewhere.
+    //
     let blocks = get_blocks();
 
     for (spawn_func, description) in spawn_funcs.iter() {

@@ -1,4 +1,4 @@
-![](assets/RaceOfTheForks.png)
+![](target/criterion/Convex system shutdown simulation using anvil/report/violin.svg)
 
 # Anvil systemShutdown provider benchmarks
 

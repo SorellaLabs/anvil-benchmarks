@@ -10,7 +10,7 @@ use eyre::Result;
 // Read the ABI directory and call build_binding for each file
 fn main() -> Result<()> {
     let abi_dir = "./abi";
-    let bindings_dir = "./src/bindings";
+    let bindings_dir = "./benches/bindings";
     let mod_file_path = Path::new(bindings_dir).join("mod.rs");
 
     ensure_directory_exists(bindings_dir)?;
