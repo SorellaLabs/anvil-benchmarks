@@ -247,8 +247,9 @@ pub mod system_shutdown {
             .with_tracing(false)
             .silent()
             .fork_compute_units_per_second(Some(2700))
-            .fork_request_timeout(Some(Duration::from_millis(45000)));
+            .fork_request_timeout(Some(Duration::from_millis(65000)));
 
         spawn_with_config(config).await
     }
 }
+cargo criterion --bench anvil_sys_shutdown_benchmark --message-format=json > anvil_sys_shutdown_benchmark.json
