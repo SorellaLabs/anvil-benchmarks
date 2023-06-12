@@ -53,7 +53,7 @@ pub fn benchmarks(c: &mut Criterion) {
                 let spawn_func = spawn_func.clone();
 
                 rt.block_on(async {
-                    let spawn_result = spawn_func(START_BLOCK).await.unwrap();
+                    let spawn_result = spawn_func(START_BLOCK-1).await.unwrap();
                     blocks_simulation(&blocks, &spawn_result.api).await;
                 })
             });
@@ -71,7 +71,7 @@ pub fn benchmarks(c: &mut Criterion) {
                         let spawn_func = spawn_func.clone();
 
                         rt.block_on(async {
-                            let spawn_result = spawn_func(block.block_number).await.unwrap();
+                            let spawn_result = spawn_func(block.block_number-1).await.unwrap();
                             block_simulation(block, &spawn_result.api).await;
                         })
                     });
@@ -85,7 +85,7 @@ pub fn benchmarks(c: &mut Criterion) {
             let rt = Runtime::new().unwrap();
 
             rt.block_on(async {
-                let spawn_result = spawn_http_remote(START_BLOCK).await.unwrap();
+                let spawn_result = spawn_http_remote(START_BLOCK-1).await.unwrap();
                 blocks_simulation(&blocks, &spawn_result.api).await;
             })
         })
@@ -100,7 +100,7 @@ pub fn benchmarks(c: &mut Criterion) {
                     let rt = Runtime::new().unwrap();
 
                     rt.block_on(async {
-                        let spawn_result = spawn_http_remote(block.block_number).await.unwrap();
+                        let spawn_result = spawn_http_remote(block.block_number-1).await.unwrap();
                         block_simulation(block, &spawn_result.api).await;
                     })
                 });
