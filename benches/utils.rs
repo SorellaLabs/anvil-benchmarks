@@ -2,7 +2,7 @@ use anvil::{eth::EthApi, spawn, NodeConfig};
 use ethers::{
     prelude::*,
     providers::{Ipc, Provider},
-    types::{NameOrAddress, Transaction, TransactionRequest, U256, U64},
+    types::{NameOrAddress, Transaction, TransactionRequest, U64},
 };
 use std::{env, error::Error, sync::Arc, time::Duration};
 

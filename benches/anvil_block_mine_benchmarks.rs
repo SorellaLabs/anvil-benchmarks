@@ -1,7 +1,7 @@
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 
 use anvil::eth::EthApi;
-use std::{env, pin::Pin};
+use std::pin::Pin;
 use tokio::{macros::support::Future, runtime::Runtime};
 mod utils;
 use crate::utils::{
@@ -41,19 +41,19 @@ pub fn benchmarks(c: &mut Criterion) {
     const END_BLOCK: u64 = 14556795;
 
     // Create a new runtime for the async task
-    let mut rt = tokio::runtime::Runtime::new().unwrap();
+    let rt = tokio::runtime::Runtime::new().unwrap();
 
     let provider = rt.block_on(spawn_ipc_provider());
     let blocks = rt.block_on(get_blocks(provider, START_BLOCK, END_BLOCK));
 
     for (spawn_func, description) in &spawn_funcs {
-        group.sample_size(10).bench_function(format!("All blocks - {}", description), |b| {
+        group.sample_size(1000).bench_function(format!("All blocks - {}", description), |b| {
             b.iter(|| {
                 let rt = Runtime::new().unwrap();
                 let spawn_func = spawn_func.clone();
 
                 rt.block_on(async {
-                    let spawn_result = spawn_func(START_BLOCK-1).await.unwrap();
+                    let spawn_result = spawn_func(START_BLOCK - 1).await.unwrap();
                     blocks_simulation(&blocks, &spawn_result.api).await;
                 })
             });
@@ -62,7 +62,7 @@ pub fn benchmarks(c: &mut Criterion) {
         for (i, block) in blocks.iter().enumerate() {
             let spawn_func = spawn_func.clone();
 
-            group.sample_size(10).bench_with_input(
+            group.sample_size(1000).bench_with_input(
                 BenchmarkId::new(format!("Block {} - {}", i, description), i),
                 block,
                 |b, block| {
@@ -71,7 +71,7 @@ pub fn benchmarks(c: &mut Criterion) {
                         let spawn_func = spawn_func.clone();
 
                         rt.block_on(async {
-                            let spawn_result = spawn_func(block.block_number-1).await.unwrap();
+                            let spawn_result = spawn_func(block.block_number - 1).await.unwrap();
                             block_simulation(block, &spawn_result.api).await;
                         })
                     });
@@ -80,12 +80,12 @@ pub fn benchmarks(c: &mut Criterion) {
         }
     }
 
-    group.sample_size(10).bench_function("All blocks - HTTP Remote", |b| {
+    /*group.sample_size(10).bench_function("All blocks - HTTP Remote", |b| {
         b.iter(|| {
             let rt = Runtime::new().unwrap();
 
             rt.block_on(async {
-                let spawn_result = spawn_http_remote(START_BLOCK-1).await.unwrap();
+                let spawn_result = spawn_http_remote(START_BLOCK - 1).await.unwrap();
                 blocks_simulation(&blocks, &spawn_result.api).await;
             })
         })
@@ -100,13 +100,13 @@ pub fn benchmarks(c: &mut Criterion) {
                     let rt = Runtime::new().unwrap();
 
                     rt.block_on(async {
-                        let spawn_result = spawn_http_remote(block.block_number-1).await.unwrap();
+                        let spawn_result = spawn_http_remote(block.block_number - 1).await.unwrap();
                         block_simulation(block, &spawn_result.api).await;
                     })
                 });
             },
         );
-    }
+    }*/
 
     group.finish();
 }
