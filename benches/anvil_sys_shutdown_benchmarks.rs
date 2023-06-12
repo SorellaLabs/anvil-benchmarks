@@ -46,7 +46,7 @@ pub fn benchmarks(c: &mut Criterion) {
     for (spawn_func, description) in spawn_funcs.iter() {
         let spawn_func = spawn_func.clone();
 
-        group.sample_size(1000).bench_function(
+        group.sample_size(10).bench_function(
             BenchmarkId::new("System shutdown", description),
             move |b| {
                 b.iter(|| {
