@@ -8,6 +8,7 @@ use crate::utils::{
     block_simulation::{Block, *},
     SpawnResult,
 };
+use std::error::Error;
 
 async fn block_simulation(block: &Block, api: &EthApi) {
     for tx in &block.txs {
@@ -25,29 +26,35 @@ async fn blocks_simulation(blocks: &[Block], api: &EthApi) {
 pub fn benchmarks(c: &mut Criterion) {
     let mut group = c.benchmark_group("Block Simulation");
 
-    let spawn_funcs: [(fn() -> Pin<Box<dyn Future<Output = SpawnResult>>>, &str); 3] = [
-        (|| Box::pin(async { spawn_http_local().await.unwrap() }), "Local Http"),
-        (|| Box::pin(async { spawn_ipc().await.unwrap() }), "Ipc"),
-        (|| Box::pin(async { spawn_ethers_reth().await.unwrap() }), "ethers-reth middleware"),
+    let spawn_funcs: [(
+        fn(u64) -> Pin<Box<dyn Future<Output = Result<SpawnResult, Box<dyn Error>>>>>,
+        &str,
+    ); 3] = [
+        (|block_number| Box::pin(spawn_http_local(block_number)), "Local Http"),
+        (|block_number| Box::pin(spawn_ipc(block_number)), "Ipc"),
+        (|block_number| Box::pin(spawn_ethers_reth(block_number)), "ethers-reth middleware"),
     ];
 
-    let spawn_http_remote = || Box::pin(async { spawn_http_remote().await.unwrap() });
+    let spawn_http_remote = |block_number| Box::pin(spawn_http_remote(block_number));
+
+    const START_BLOCK: u64 = 14556786;
+    const END_BLOCK: u64 = 14556795;
 
     // Create a new runtime for the async task
     let mut rt = tokio::runtime::Runtime::new().unwrap();
 
     let provider = rt.block_on(spawn_ipc_provider());
-    let blocks = rt.block_on(get_blocks(provider, 14556786, 14556795));
+    let blocks = rt.block_on(get_blocks(provider, START_BLOCK, END_BLOCK));
 
     for (spawn_func, description) in &spawn_funcs {
-        group.sample_size(1000).bench_function(format!("All blocks - {}", description), |b| {
+        group.sample_size(10).bench_function(format!("All blocks - {}", description), |b| {
             b.iter(|| {
                 let rt = Runtime::new().unwrap();
                 let spawn_func = spawn_func.clone();
 
                 rt.block_on(async {
-                    let anvil_result = spawn_func().await;
-                    blocks_simulation(&blocks, &anvil_result.api).await;
+                    let spawn_result = spawn_func(START_BLOCK).await.unwrap();
+                    blocks_simulation(&blocks, &spawn_result.api).await;
                 })
             });
         });
@@ -55,7 +62,7 @@ pub fn benchmarks(c: &mut Criterion) {
         for (i, block) in blocks.iter().enumerate() {
             let spawn_func = spawn_func.clone();
 
-            group.sample_size(1000).bench_with_input(
+            group.sample_size(10).bench_with_input(
                 BenchmarkId::new(format!("Block {} - {}", i, description), i),
                 block,
                 |b, block| {
@@ -64,8 +71,8 @@ pub fn benchmarks(c: &mut Criterion) {
                         let spawn_func = spawn_func.clone();
 
                         rt.block_on(async {
-                            let anvil_result = spawn_func().await;
-                            block_simulation(block, &anvil_result.api).await;
+                            let spawn_result = spawn_func(block.block_number).await.unwrap();
+                            block_simulation(block, &spawn_result.api).await;
                         })
                     });
                 },
@@ -73,13 +80,13 @@ pub fn benchmarks(c: &mut Criterion) {
         }
     }
 
-    /*group.sample_size(10).bench_function("All blocks - HTTP Remote", |b| {
+    group.sample_size(10).bench_function("All blocks - HTTP Remote", |b| {
         b.iter(|| {
             let rt = Runtime::new().unwrap();
 
             rt.block_on(async {
-                let anvil_result = spawn_http_remote().await;
-                blocks_simulation(&blocks, &anvil_result.api).await;
+                let spawn_result = spawn_http_remote(START_BLOCK).await.unwrap();
+                blocks_simulation(&blocks, &spawn_result.api).await;
             })
         })
     });
@@ -93,16 +100,15 @@ pub fn benchmarks(c: &mut Criterion) {
                     let rt = Runtime::new().unwrap();
 
                     rt.block_on(async {
-                        let anvil_result = spawn_http_remote().await;
-                        block_simulation(block, &anvil_result.api).await;
+                        let spawn_result = spawn_http_remote(block.block_number).await.unwrap();
+                        block_simulation(block, &spawn_result.api).await;
                     })
                 });
             },
         );
-    }*/
+    }
 
     group.finish();
 }
-
 criterion_group!(benches, benchmarks);
 criterion_main!(benches);

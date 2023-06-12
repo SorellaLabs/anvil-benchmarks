@@ -1,10 +1,10 @@
 use anvil::{eth::EthApi, spawn, NodeConfig};
-use ethers::prelude::*;
-use std::{env, error::Error, sync::Arc, time::Duration};
 use ethers::{
+    prelude::*,
     providers::{Ipc, Provider},
     types::{NameOrAddress, Transaction, TransactionRequest, U256, U64},
 };
+use std::{env, error::Error, sync::Arc, time::Duration};
 
 const GAS: u64 = 30_000_000;
 
@@ -28,12 +28,13 @@ pub mod block_simulation {
     use super::*;
 
     pub struct Block {
+        pub block_number: u64,
         pub txs: Vec<TransactionRequest>,
     }
 
     impl Block {
-        fn new(txs: Vec<TransactionRequest>) -> Self {
-            Self { txs }
+        fn new(block_number: u64, txs: Vec<TransactionRequest>) -> Self {
+            Self { block_number, txs }
         }
     }
 
@@ -58,11 +59,9 @@ pub mod block_simulation {
 
     async fn get_block(provider: &Provider<Ipc>, block_number: u64) -> Block {
         let block = provider.get_block_with_txs(block_number).await.unwrap().unwrap();
-
         let txs: Vec<TransactionRequest> =
             block.transactions.into_iter().map(into_tx_request).collect::<Vec<_>>();
-
-        Block::new(txs)
+        Block::new(block_number, txs)
     }
 
     pub async fn get_blocks(
@@ -84,19 +83,19 @@ pub mod block_simulation {
         api.anvil_auto_impersonate_account(true).await.unwrap();
         Ok(SpawnResult::new(api, provider))
     }
-    pub async fn spawn_http_local() -> Result<SpawnResult, Box<dyn Error>> {
-        spawn_http(true).await
+    pub async fn spawn_http_local(block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
+        spawn_http(true, block_number).await
     }
 
-    pub async fn spawn_http_remote() -> Result<SpawnResult, Box<dyn Error>> {
-        spawn_http(false).await
+    pub async fn spawn_http_remote(block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
+        spawn_http(false, block_number).await
     }
 
-    pub async fn spawn_ipc() -> Result<SpawnResult, Box<dyn Error>> {
+    pub async fn spawn_ipc(fork_block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
         let ipc_path = env::var("ETH_IPC_PATH").expect("ETH_IPC_PATH not found in .env");
         let config = NodeConfig::default()
             .with_eth_ipc_path(Some(ipc_path.to_string()))
-            .with_fork_block_number::<u64>(Some(14445961))
+            .with_fork_block_number::<u64>(Some(fork_block_number))
             .with_ipc(Some(None))
             .with_gas_limit(Some(GAS))
             .no_storage_caching()
@@ -108,14 +107,14 @@ pub mod block_simulation {
         spawn_with_config(config).await
     }
 
-    pub async fn spawn_ethers_reth() -> Result<SpawnResult, Box<dyn Error>> {
+    pub async fn spawn_ethers_reth(fork_block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
         let ipc_path = env::var("ETH_IPC_PATH").expect("ETH_IPC_PATH not found in .env");
         let db_path = env::var("ETH_DB_PATH").expect("ETH_DB_PATH not found in .env");
 
         let config = NodeConfig::default()
             .with_eth_ipc_path(Some(ipc_path.to_string()))
             .with_eth_reth_db(Some(db_path.to_string()))
-            .with_fork_block_number::<u64>(Some(14445961))
+            .with_fork_block_number::<u64>(Some(fork_block_number))
             .with_ipc(Some(None))
             .with_gas_limit(Some(GAS))
             .no_storage_caching()
@@ -127,7 +126,10 @@ pub mod block_simulation {
         spawn_with_config(config).await
     }
 
-    pub async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
+    pub async fn spawn_http(
+        local: bool,
+        fork_block_number: u64,
+    ) -> Result<SpawnResult, Box<dyn Error>> {
         let rpc_url = match local {
             true => env::var("ETH_RPC_URL_LOCAL").expect("ETH_RPC_URL_LOCAL not found in .env"),
             false => env::var("ETH_RPC_URL").expect("ETH_RPC_URL not found in .env"),
@@ -136,7 +138,7 @@ pub mod block_simulation {
         let config = NodeConfig::default()
             .with_eth_rpc_url(Some(rpc_url.to_string()))
             .with_port(1299)
-            .with_fork_block_number::<u64>(Some(14445961))
+            .with_fork_block_number::<u64>(Some(fork_block_number))
             .with_ipc(Some(None))
             .with_gas_limit(Some(GAS))
             .no_storage_caching()
