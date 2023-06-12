@@ -34,7 +34,7 @@ async fn system_shutdown(api: &EthApi, provider: Arc<Provider<Ipc>>) {
 }
 
 pub fn benchmarks(c: &mut Criterion) {
-    let mut group = c.benchmark_group("Convex system shutdown simulation");
+    let mut group = c.benchmark_group("Anvil");
 
     // An array of async functions that spawn nodes with different configurations
     let spawn_funcs: [(fn() -> Pin<Box<dyn Future<Output = SpawnResult>>>, &str); 3] = [
@@ -46,8 +46,8 @@ pub fn benchmarks(c: &mut Criterion) {
     for (spawn_func, description) in spawn_funcs.iter() {
         let spawn_func = spawn_func.clone();
 
-        group.sample_size(1000).bench_function(
-            BenchmarkId::new("System shutdown", description),
+        group.sample_size(10).bench_function(
+            BenchmarkId::new("System shutdown simulation using: ", description),
             move |b| {
                 b.iter(|| {
                     let rt = Runtime::new().unwrap();
