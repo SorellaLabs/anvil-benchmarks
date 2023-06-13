@@ -86,13 +86,13 @@ This chart shows the relationship between function/parameter and iteration time.
 
 #### Sequential Simulation
 
-![System Shutdown Violin Chart](/target/criterion/reports/Sequential_Simulation/violin.svg)
+![System Shutdown Violin Chart](target/criterion/reports/Sequential%20Simulation/violin.svg)
 
 - As we can see here, ethers-reth is not only faster, it is also more consistent.
 
 #### Convex Finance System Shutdown
 
-![System Shutdown Violin Chart](/target/criterion/reports/Convex_Finance_System_Shutdown/violin.svg)
+![System Shutdown Violin Chart](target/criterion/reports/Convex%20Finance%20System%20Shutdown/violin.svg)
 
 ### Setup
 
