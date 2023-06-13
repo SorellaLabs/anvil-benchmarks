@@ -45,9 +45,10 @@ pub fn benchmarks(c: &mut Criterion) {
 
     for (spawn_func, description) in spawn_funcs.iter() {
         let spawn_func = spawn_func.clone();
+        let description = *description;
 
         group.sample_size(10).bench_function(
-            BenchmarkId::new("System shutdown simulation using: ", description),
+            BenchmarkId::new(description, "System_shutdown"),
             move |b| {
                 b.iter(|| {
                     let rt = Runtime::new().unwrap();
@@ -62,7 +63,6 @@ pub fn benchmarks(c: &mut Criterion) {
             },
         );
     }
-
     /*// Special case for HTTP Remote due to rate limiting.
     let spawn_http_remote = || Box::pin(async { spawn_http_remote().await.unwrap() });
     group.sample_size(10).bench_function(

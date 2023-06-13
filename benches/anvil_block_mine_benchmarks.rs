@@ -1,14 +1,15 @@
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use std::{error::Error, pin::Pin};
 
-use anvil::eth::EthApi;
-use std::pin::Pin;
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use tokio::{macros::support::Future, runtime::Runtime};
+
+// Local
+use anvil::eth::EthApi;
 mod utils;
 use crate::utils::{
     block_simulation::{Block, *},
     SpawnResult,
 };
-use std::error::Error;
 
 async fn block_simulation(block: &Block, api: &EthApi) {
     for tx in &block.txs {
@@ -30,24 +31,21 @@ pub fn benchmarks(c: &mut Criterion) {
         fn(u64) -> Pin<Box<dyn Future<Output = Result<SpawnResult, Box<dyn Error>>>>>,
         &str,
     ); 3] = [
-        (|block_number| Box::pin(spawn_http_local(block_number)), "Local Http"),
+        (|block_number| Box::pin(spawn_http_local(block_number)), "Local_Http"),
         (|block_number| Box::pin(spawn_ipc(block_number)), "Ipc"),
-        (|block_number| Box::pin(spawn_ethers_reth(block_number)), "ethers-reth middleware"),
+        (|block_number| Box::pin(spawn_ethers_reth(block_number)), "ethers_reth_middleware"),
     ];
-
-    
 
     const START_BLOCK: u64 = 14556786;
     const END_BLOCK: u64 = 14556795;
 
-    // Create a new runtime for the async task
     let rt = tokio::runtime::Runtime::new().unwrap();
 
     let provider = rt.block_on(spawn_ipc_provider());
     let blocks = rt.block_on(get_blocks(provider, START_BLOCK, END_BLOCK));
 
     for (spawn_func, description) in &spawn_funcs {
-        group.sample_size(10).bench_function(format!("All blocks - {}", description), |b| {
+        group.sample_size(10).bench_function(BenchmarkId::new("All_blocks", description), |b| {
             b.iter(|| {
                 let rt = Runtime::new().unwrap();
                 let spawn_func = spawn_func.clone();
@@ -63,7 +61,7 @@ pub fn benchmarks(c: &mut Criterion) {
             let spawn_func = spawn_func.clone();
 
             group.sample_size(10).bench_with_input(
-                BenchmarkId::new(format!("Block {} - {}", i, description), i),
+                BenchmarkId::new(*description, format!("Block_{}", i)),
                 block,
                 |b, block| {
                     b.iter(|| {
@@ -80,10 +78,11 @@ pub fn benchmarks(c: &mut Criterion) {
         }
     }
 
-
+    //Did not run due to rate limiting, if anyone has a very expensive RPC subscription, feel free
+    // to run it :)
     /*
     let spawn_http_remote = |block_number| Box::pin(spawn_http_remote(block_number));
-    
+
     group.sample_size(10).bench_function("All blocks - HTTP Remote", |b| {
         b.iter(|| {
             let rt = Runtime::new().unwrap();
