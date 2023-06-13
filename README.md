@@ -82,13 +82,13 @@ The benchmarks were all performed over 1000 iterations. The results are summariz
 
 ### Charts
 
-This chart shows the relationship between function/parameter and iteration time. The thickness of the shaded region indicates the probability that a measurement of the given function/parameter would take a particular length of time.
+This chart shows the relationship between function and iteration time. The thickness of the shaded region indicates the probability that a measurement of the given function would take a particular length of time.
 
 #### Sequential Simulation
 
 ![System Shutdown Violin Chart](target/criterion/reports/Sequential%20Simulation/violin.svg)
 
-- As we can see here, ethers-reth is not only faster, it is also more consistent.
+- As we can see here, ethers-reth is not only faster, but it is also more consistent.
 
 #### Convex Finance System Shutdown
 
