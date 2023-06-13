@@ -34,7 +34,7 @@ async fn system_shutdown(api: &EthApi, provider: Arc<Provider<Ipc>>) {
 }
 
 pub fn benchmarks(c: &mut Criterion) {
-    let mut group = c.benchmark_group("Anvil");
+    let mut group = c.benchmark_group("Convex Finance System Shutdown");
 
     // An array of async functions that spawn nodes with different configurations
     let spawn_funcs: [(fn() -> Pin<Box<dyn Future<Output = SpawnResult>>>, &str); 3] = [

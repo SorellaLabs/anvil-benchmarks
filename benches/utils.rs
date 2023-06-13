@@ -30,11 +30,12 @@ pub mod block_simulation {
     pub struct Block {
         pub block_number: u64,
         pub txs: Vec<TransactionRequest>,
+        pub gas_used: U256,
     }
 
     impl Block {
-        fn new(block_number: u64, txs: Vec<TransactionRequest>) -> Self {
-            Self { block_number, txs }
+        fn new(block_number: u64, txs: Vec<TransactionRequest>, gas_used: U256) -> Self {
+            Self { block_number, txs, gas_used }
         }
     }
 
@@ -61,7 +62,7 @@ pub mod block_simulation {
         let block = provider.get_block_with_txs(block_number).await.unwrap().unwrap();
         let txs: Vec<TransactionRequest> =
             block.transactions.into_iter().map(into_tx_request).collect::<Vec<_>>();
-        Block::new(block_number, txs)
+        Block::new(block_number, txs, block.gas_used) // pass the gas_used field here
     }
 
     pub async fn get_blocks(
@@ -79,7 +80,8 @@ pub mod block_simulation {
 
     pub async fn spawn_with_config(config: NodeConfig) -> Result<SpawnResult, Box<dyn Error>> {
         let (api, handle) = spawn(config).await;
-        let provider = Arc::new(Provider::<Ipc>::connect_ipc(handle.ipc_path().unwrap()).await?);
+        let provider: Arc<Provider<Ipc>> =
+            Arc::new(Provider::<Ipc>::connect_ipc(handle.ipc_path().unwrap()).await?);
         api.anvil_auto_impersonate_account(true).await.unwrap();
         Ok(SpawnResult::new(api, provider))
     }

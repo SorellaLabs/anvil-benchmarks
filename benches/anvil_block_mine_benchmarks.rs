@@ -50,7 +50,10 @@ pub fn benchmarks(c: &mut Criterion) {
                 let spawn_func = spawn_func.clone();
 
                 group.sample_size(10).bench_with_input(
-                    BenchmarkId::new(*description, format!("Block_{}", i)),
+                    BenchmarkId::new(
+                        *description,
+                        format!("Block_{}, TotalGas: {}", i, block.gas_used),
+                    ),
                     block,
                     |b, block| {
                         b.iter(|| {
@@ -73,11 +76,11 @@ pub fn benchmarks(c: &mut Criterion) {
 
     // Sequential Block Simulation
     {
-        let mut group = c.benchmark_group("All Blocks Sequential Simulation");
+        let mut group = c.benchmark_group("Sequential Simulation");
 
         for (spawn_func, description) in &spawn_funcs {
             group.sample_size(10).bench_function(
-                BenchmarkId::new(*description, "All_blocks"),
+                BenchmarkId::new(*description, "Blocks 14556786 -> 14556795"),
                 |b| {
                     b.iter(|| {
                         let rt = Runtime::new().unwrap();
