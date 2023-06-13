@@ -25,8 +25,6 @@ async fn blocks_simulation(blocks: &[Block], api: &EthApi) {
 }
 
 pub fn benchmarks(c: &mut Criterion) {
-    let mut group = c.benchmark_group("Block Simulation");
-
     let spawn_funcs: [(
         fn(u64) -> Pin<Box<dyn Future<Output = Result<SpawnResult, Box<dyn Error>>>>>,
         &str,
@@ -40,78 +38,100 @@ pub fn benchmarks(c: &mut Criterion) {
     const END_BLOCK: u64 = 14556795;
 
     let rt = tokio::runtime::Runtime::new().unwrap();
-
     let provider = rt.block_on(spawn_ipc_provider());
     let blocks = rt.block_on(get_blocks(provider, START_BLOCK, END_BLOCK));
 
-    for (spawn_func, description) in &spawn_funcs {
-        group.sample_size(10).bench_function(BenchmarkId::new("All_blocks", description), |b| {
-            b.iter(|| {
-                let rt = Runtime::new().unwrap();
+    // Individual block benchmarks
+    {
+        let mut group = c.benchmark_group("Individual Block Simulation");
+
+        for (spawn_func, description) in &spawn_funcs {
+            for (i, block) in blocks.iter().enumerate() {
                 let spawn_func = spawn_func.clone();
 
-                rt.block_on(async {
-                    let spawn_result = spawn_func(START_BLOCK - 1).await.unwrap();
-                    blocks_simulation(&blocks, &spawn_result.api).await;
-                })
-            });
-        });
+                group.sample_size(10).bench_with_input(
+                    BenchmarkId::new(*description, format!("Block_{}", i)),
+                    block,
+                    |b, block| {
+                        b.iter(|| {
+                            let rt = Runtime::new().unwrap();
+                            let spawn_func = spawn_func.clone();
 
-        for (i, block) in blocks.iter().enumerate() {
-            let spawn_func = spawn_func.clone();
+                            rt.block_on(async {
+                                let spawn_result =
+                                    spawn_func(block.block_number - 1).await.unwrap();
+                                block_simulation(block, &spawn_result.api).await;
+                            })
+                        });
+                    },
+                );
+            }
+        }
 
-            group.sample_size(10).bench_with_input(
-                BenchmarkId::new(*description, format!("Block_{}", i)),
-                block,
-                |b, block| {
+        group.finish();
+    }
+
+    // All blocks benchmark
+    {
+        let mut group = c.benchmark_group("All Blocks Simulation");
+
+        for (spawn_func, description) in &spawn_funcs {
+            group.sample_size(10).bench_function(
+                BenchmarkId::new("All_blocks", description),
+                |b| {
                     b.iter(|| {
                         let rt = Runtime::new().unwrap();
                         let spawn_func = spawn_func.clone();
 
                         rt.block_on(async {
-                            let spawn_result = spawn_func(block.block_number - 1).await.unwrap();
+                            let spawn_result = spawn_func(START_BLOCK - 1).await.unwrap();
+                            blocks_simulation(&blocks, &spawn_result.api).await;
+                        })
+                    });
+                },
+            );
+        }
+        group.finish();
+    }
+
+    // HTTP Remote benchmark - Commented due to rate limiting issues.
+    // To run this, ensure you have an expensive RPC subscription.
+    /*
+    {
+        let mut group = c.benchmark_group("HTTP Remote Simulation");
+        let spawn_http_remote = |block_number| Box::pin(spawn_http_remote(block_number));
+
+        group.sample_size(10).bench_function("All blocks - HTTP Remote", |b| {
+            b.iter(|| {
+                let rt = Runtime::new().unwrap();
+
+                rt.block_on(async {
+                    let spawn_result = spawn_http_remote(START_BLOCK - 1).await.unwrap();
+                    blocks_simulation(&blocks, &spawn_result.api).await;
+                })
+            })
+        });
+
+        for (i, block) in blocks.iter().enumerate() {
+            group.sample_size(10).bench_with_input(
+                BenchmarkId::new(format!("Block_{} - HTTP Remote", i), block),
+                |b, block| {
+                    b.iter(|| {
+                        let rt = Runtime::new().unwrap();
+
+                        rt.block_on(async {
+                            let spawn_result = spawn_http_remote(block.block_number - 1).await.unwrap();
                             block_simulation(block, &spawn_result.api).await;
                         })
                     });
                 },
             );
         }
+
+        group.finish();
     }
-
-    //Did not run due to rate limiting, if anyone has a very expensive RPC subscription, feel free
-    // to run it :)
-    /*
-    let spawn_http_remote = |block_number| Box::pin(spawn_http_remote(block_number));
-
-    group.sample_size(10).bench_function("All blocks - HTTP Remote", |b| {
-        b.iter(|| {
-            let rt = Runtime::new().unwrap();
-
-            rt.block_on(async {
-                let spawn_result = spawn_http_remote(START_BLOCK - 1).await.unwrap();
-                blocks_simulation(&blocks, &spawn_result.api).await;
-            })
-        })
-    });
-
-    for (i, block) in blocks.iter().enumerate() {
-        group.sample_size(10).bench_with_input(
-            BenchmarkId::new(format!("Block {} - HTTP Remote", i), i),
-            block,
-            |b, block| {
-                b.iter(|| {
-                    let rt = Runtime::new().unwrap();
-
-                    rt.block_on(async {
-                        let spawn_result = spawn_http_remote(block.block_number - 1).await.unwrap();
-                        block_simulation(block, &spawn_result.api).await;
-                    })
-                });
-            },
-        );
-    }*/
-
-    group.finish();
+    */
 }
+
 criterion_group!(benches, benchmarks);
 criterion_main!(benches);
