@@ -47,7 +47,7 @@ pub fn benchmarks(c: &mut Criterion) {
         let spawn_func = spawn_func.clone();
         let description = *description;
 
-        group.sample_size(10).bench_function(
+        group.sample_size(1000).bench_function(
             BenchmarkId::new(description, "System_shutdown"),
             move |b| {
                 b.iter(|| {
@@ -63,7 +63,10 @@ pub fn benchmarks(c: &mut Criterion) {
             },
         );
     }
-    /*// Special case for HTTP Remote due to rate limiting.
+
+    // HTTP Remote benchmark - Commented out due to rate limiting issues.
+    // Feem free to run this is you access to a high throughput remote rpc endpoint.
+    /*
     let spawn_http_remote = || Box::pin(async { spawn_http_remote().await.unwrap() });
     group.sample_size(10).bench_function(
         BenchmarkId::new("System shutdown", "HTTP Remote"),

@@ -31,7 +31,7 @@ pub fn benchmarks(c: &mut Criterion) {
     ); 3] = [
         (|block_number| Box::pin(spawn_http_local(block_number)), "Local_Http"),
         (|block_number| Box::pin(spawn_ipc(block_number)), "Ipc"),
-        (|block_number| Box::pin(spawn_ethers_reth(block_number)), "ethers_reth_middleware"),
+        (|block_number| Box::pin(spawn_ethers_reth(block_number)), "ethers-reth"),
     ];
 
     const START_BLOCK: u64 = 14556786;
@@ -46,7 +46,7 @@ pub fn benchmarks(c: &mut Criterion) {
         let mut group = c.benchmark_group("Sequential Simulation");
 
         for (spawn_func, description) in &spawn_funcs {
-            group.sample_size(10).bench_function(
+            group.sample_size(1000).bench_function(
                 BenchmarkId::new(*description, "Blocks 14,556,786 -> 14,556,795"),
                 |b| {
                     b.iter(|| {
@@ -72,7 +72,7 @@ pub fn benchmarks(c: &mut Criterion) {
             for (i, block) in blocks.iter().enumerate() {
                 let spawn_func = spawn_func.clone();
 
-                group.sample_size(10).bench_with_input(
+                group.sample_size(1000).bench_with_input(
                     BenchmarkId::new(
                         *description,
                         format!(
@@ -101,8 +101,8 @@ pub fn benchmarks(c: &mut Criterion) {
         group.finish();
     }
 
-    // HTTP Remote benchmark - Commented due to rate limiting issues.
-    // To run this, ensure you have an expensive RPC subscription.
+    // HTTP Remote benchmark - Commented out due to rate limiting issues.
+    // Feem free to run this is you access to a high throughput remote rpc endpoint.
     /*
     {
         let mut group = c.benchmark_group("HTTP Remote Simulation");
