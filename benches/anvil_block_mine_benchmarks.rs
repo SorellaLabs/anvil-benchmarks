@@ -1,8 +1,8 @@
 use std::{error::Error, pin::Pin};
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-use tokio::{macros::support::Future, runtime::Runtime};
 use num_format::{Locale, ToFormattedString};
+use tokio::{macros::support::Future, runtime::Runtime};
 // Local
 use anvil::eth::EthApi;
 mod utils;
@@ -41,39 +41,6 @@ pub fn benchmarks(c: &mut Criterion) {
     let provider = rt.block_on(spawn_ipc_provider());
     let blocks = rt.block_on(get_blocks(provider, START_BLOCK, END_BLOCK));
 
-    // Single Block Simulation Benchmarking
-    {
-        let mut group = c.benchmark_group("Individual Block Simulation");
-
-        for (spawn_func, description) in &spawn_funcs {
-            for (i, block) in blocks.iter().enumerate() {
-                let spawn_func = spawn_func.clone();
-
-                group.sample_size(10).bench_with_input(
-                    BenchmarkId::new(
-                        *description,
-                        format!("Block: {}, TotalGas: {}", i.to_formatted_string(&Locale::en), block.gas_used.to_formatted_string(&Locale::en)),
-                    ),
-                    block,
-                    |b, block| {
-                        b.iter(|| {
-                            let rt = Runtime::new().unwrap();
-                            let spawn_func = spawn_func.clone();
-
-                            rt.block_on(async {
-                                let spawn_result =
-                                    spawn_func(block.block_number - 1).await.unwrap();
-                                block_simulation(block, &spawn_result.api).await;
-                            })
-                        });
-                    },
-                );
-            }
-        }
-
-        group.finish();
-    }
-
     // Sequential Block Simulation
     {
         let mut group = c.benchmark_group("Sequential Simulation");
@@ -94,6 +61,43 @@ pub fn benchmarks(c: &mut Criterion) {
                 },
             );
         }
+        group.finish();
+    }
+
+    // Single Block Simulation Benchmarking
+    {
+        let mut group = c.benchmark_group("Individual Block Simulation");
+
+        for (spawn_func, description) in &spawn_funcs {
+            for (i, block) in blocks.iter().enumerate() {
+                let spawn_func = spawn_func.clone();
+
+                group.sample_size(10).bench_with_input(
+                    BenchmarkId::new(
+                        *description,
+                        format!(
+                            "Block: {}, TotalGas: {}",
+                            i.to_formatted_string(&Locale::en),
+                            block.gas_used.to_formatted_string(&Locale::en)
+                        ),
+                    ),
+                    block,
+                    |b, block| {
+                        b.iter(|| {
+                            let rt = Runtime::new().unwrap();
+                            let spawn_func = spawn_func.clone();
+
+                            rt.block_on(async {
+                                let spawn_result =
+                                    spawn_func(block.block_number - 1).await.unwrap();
+                                block_simulation(block, &spawn_result.api).await;
+                            })
+                        });
+                    },
+                );
+            }
+        }
+
         group.finish();
     }
 
