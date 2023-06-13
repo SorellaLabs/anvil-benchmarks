@@ -1,0 +1,132 @@
+   Compiling anvil-benchmarks v0.1.0 (/NVMe/anvil-benchmarks)
+warning: function `spawn_http_remote` is never used
+  --> benches/utils.rs:92:18
+   |
+92 |     pub async fn spawn_http_remote(block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
+   |                  ^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: function `spawn_with_config` is never used
+   --> benches/utils.rs:161:18
+    |
+161 |     pub async fn spawn_with_config(config: NodeConfig) -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_http_local` is never used
+   --> benches/utils.rs:167:18
+    |
+167 |     pub async fn spawn_http_local() -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^^^^^^^^
+
+warning: function `spawn_http_remote` is never used
+   --> benches/utils.rs:171:18
+    |
+171 |     pub async fn spawn_http_remote() -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_ipc` is never used
+   --> benches/utils.rs:175:18
+    |
+175 |     pub async fn spawn_ipc() -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^
+
+warning: function `spawn_ethers_reth` is never used
+   --> benches/utils.rs:190:18
+    |
+190 |     pub async fn spawn_ethers_reth() -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_http` is never used
+   --> benches/utils.rs:208:18
+    |
+208 |     pub async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^^
+
+warning: function `spawn_ipc_provider` is never used
+  --> benches/utils.rs:24:18
+   |
+24 |     pub async fn spawn_ipc_provider() -> Provider<Ipc> {
+   |                  ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: struct `Block` is never constructed
+  --> benches/utils.rs:30:16
+   |
+30 |     pub struct Block {
+   |                ^^^^^
+
+warning: associated function `new` is never used
+  --> benches/utils.rs:37:12
+   |
+36 |     impl Block {
+   |     ---------- associated function in this implementation
+37 |         fn new(block_number: u64, txs: Vec<TransactionRequest>, gas_used: u64) -> Self {
+   |            ^^^
+
+warning: function `into_tx_request` is never used
+  --> benches/utils.rs:42:8
+   |
+42 |     fn into_tx_request(tx: Transaction) -> TransactionRequest {
+   |        ^^^^^^^^^^^^^^^
+
+warning: function `get_block` is never used
+  --> benches/utils.rs:61:14
+   |
+61 |     async fn get_block(provider: &Provider<Ipc>, block_number: u64) -> Block {
+   |              ^^^^^^^^^
+
+warning: function `get_blocks` is never used
+  --> benches/utils.rs:68:18
+   |
+68 |     pub async fn get_blocks(
+   |                  ^^^^^^^^^^
+
+warning: function `spawn_with_config` is never used
+  --> benches/utils.rs:81:18
+   |
+81 |     pub async fn spawn_with_config(config: NodeConfig) -> Result<SpawnResult, Box<dyn Error>> {
+   |                  ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_http_local` is never used
+  --> benches/utils.rs:88:18
+   |
+88 |     pub async fn spawn_http_local(block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
+   |                  ^^^^^^^^^^^^^^^^
+
+warning: function `spawn_http_remote` is never used
+  --> benches/utils.rs:92:18
+   |
+92 |     pub async fn spawn_http_remote(block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
+   |                  ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_ipc` is never used
+  --> benches/utils.rs:96:18
+   |
+96 |     pub async fn spawn_ipc(fork_block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
+   |                  ^^^^^^^^^
+
+warning: function `spawn_ethers_reth` is never used
+   --> benches/utils.rs:112:18
+    |
+112 |     pub async fn spawn_ethers_reth(fork_block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_http` is never used
+   --> benches/utils.rs:131:18
+    |
+131 |     pub async fn spawn_http(
+    |                  ^^^^^^^^^^
+
+warning: `anvil-benchmarks` (bench "anvil_sys_shutdown_benchmarks") generated 13 warnings (1 duplicate)
+error: could not compile `anvil-benchmarks` (bench "anvil_sys_shutdown_benchmarks"); 13 warnings emitted
+
+Caused by:
+  process didn't exit successfully: `rustc --crate-name anvil_sys_shutdown_benchmarks --edition=2021 benches/anvil_sys_shutdown_benchmarks.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --emit=dep-info,link -C opt-level=3 -C embed-bitcode=no --cfg test -C metadata=a12dffd2f98541cf -C extra-filename=-a12dffd2f98541cf --out-dir /NVMe/anvil-benchmarks/target/release/deps -L dependency=/NVMe/anvil-benchmarks/target/release/deps --extern anvil=/NVMe/anvil-benchmarks/target/release/deps/libanvil-76293708889672c2.rlib --extern criterion=/NVMe/anvil-benchmarks/target/release/deps/libcriterion-1348c7686b25f9ac.rlib --extern criterion_table=/NVMe/anvil-benchmarks/target/release/deps/libcriterion_table-c5ffa2317be85b6e.rlib --extern csv=/NVMe/anvil-benchmarks/target/release/deps/libcsv-e3ba16744890fb2f.rlib --extern ethers=/NVMe/anvil-benchmarks/target/release/deps/libethers-7b331a302e71cef4.rlib --extern hex=/NVMe/anvil-benchmarks/target/release/deps/libhex-e68005bd9e4548d9.rlib --extern lazy_static=/NVMe/anvil-benchmarks/target/release/deps/liblazy_static-63495e24c1a5c923.rlib --extern ndarray=/NVMe/anvil-benchmarks/target/release/deps/libndarray-60bb6dc25a28d13c.rlib --extern ndarray_stats=/NVMe/anvil-benchmarks/target/release/deps/libndarray_stats-09006d19ae32ea42.rlib --extern num_format=/NVMe/anvil-benchmarks/target/release/deps/libnum_format-030b267220035689.rlib --extern num_traits=/NVMe/anvil-benchmarks/target/release/deps/libnum_traits-092358cd35cf095f.rlib --extern serde=/NVMe/anvil-benchmarks/target/release/deps/libserde-caab7fa846a8579a.rlib --extern tokio=/NVMe/anvil-benchmarks/target/release/deps/libtokio-0490d79d33990f47.rlib -L native=/NVMe/anvil-benchmarks/target/release/build/ring-8b8c9bf68dc28406/out -L native=/NVMe/anvil-benchmarks/target/release/build/secp256k1-sys-cd4c2dc4e6488426/out -L native=/NVMe/anvil-benchmarks/target/release/build/zstd-sys-e328ca22022a6a63/out -L native=/NVMe/anvil-benchmarks/target/release/build/reth-mdbx-sys-ab3b006ebce6acdc/out` (signal: 15, SIGTERM: termination signal)
+warning: build failed, waiting for other jobs to finish...
+warning: `anvil-benchmarks` (bench "anvil_block_mine_benchmarks") generated 7 warnings
+error: could not compile `anvil-benchmarks` (bench "anvil_block_mine_benchmarks"); 7 warnings emitted
+
+Caused by:
+  process didn't exit successfully: `rustc --crate-name anvil_block_mine_benchmarks --edition=2021 benches/anvil_block_mine_benchmarks.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --emit=dep-info,link -C opt-level=3 -C embed-bitcode=no --cfg test -C metadata=3c4b9b4f2e5962ec -C extra-filename=-3c4b9b4f2e5962ec --out-dir /NVMe/anvil-benchmarks/target/release/deps -L dependency=/NVMe/anvil-benchmarks/target/release/deps --extern anvil=/NVMe/anvil-benchmarks/target/release/deps/libanvil-76293708889672c2.rlib --extern criterion=/NVMe/anvil-benchmarks/target/release/deps/libcriterion-1348c7686b25f9ac.rlib --extern criterion_table=/NVMe/anvil-benchmarks/target/release/deps/libcriterion_table-c5ffa2317be85b6e.rlib --extern csv=/NVMe/anvil-benchmarks/target/release/deps/libcsv-e3ba16744890fb2f.rlib --extern ethers=/NVMe/anvil-benchmarks/target/release/deps/libethers-7b331a302e71cef4.rlib --extern hex=/NVMe/anvil-benchmarks/target/release/deps/libhex-e68005bd9e4548d9.rlib --extern lazy_static=/NVMe/anvil-benchmarks/target/release/deps/liblazy_static-63495e24c1a5c923.rlib --extern ndarray=/NVMe/anvil-benchmarks/target/release/deps/libndarray-60bb6dc25a28d13c.rlib --extern ndarray_stats=/NVMe/anvil-benchmarks/target/release/deps/libndarray_stats-09006d19ae32ea42.rlib --extern num_format=/NVMe/anvil-benchmarks/target/release/deps/libnum_format-030b267220035689.rlib --extern num_traits=/NVMe/anvil-benchmarks/target/release/deps/libnum_traits-092358cd35cf095f.rlib --extern serde=/NVMe/anvil-benchmarks/target/release/deps/libserde-caab7fa846a8579a.rlib --extern tokio=/NVMe/anvil-benchmarks/target/release/deps/libtokio-0490d79d33990f47.rlib -L native=/NVMe/anvil-benchmarks/target/release/build/ring-8b8c9bf68dc28406/out -L native=/NVMe/anvil-benchmarks/target/release/build/secp256k1-sys-cd4c2dc4e6488426/out -L native=/NVMe/anvil-benchmarks/target/release/build/zstd-sys-e328ca22022a6a63/out -L native=/NVMe/anvil-benchmarks/target/release/build/reth-mdbx-sys-ab3b006ebce6acdc/out` (signal: 15, SIGTERM: termination signal)

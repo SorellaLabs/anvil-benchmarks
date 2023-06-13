@@ -1,0 +1,423 @@
+nohup: ignoring input
+   Compiling anvil-benchmarks v0.1.0 (/NVMe/anvil-benchmarks)
+warning: function `spawn_http_remote` is never used
+  --> benches/utils.rs:92:18
+   |
+92 |     pub async fn spawn_http_remote(block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
+   |                  ^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: function `spawn_with_config` is never used
+   --> benches/utils.rs:161:18
+    |
+161 |     pub async fn spawn_with_config(config: NodeConfig) -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_http_local` is never used
+   --> benches/utils.rs:167:18
+    |
+167 |     pub async fn spawn_http_local() -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^^^^^^^^
+
+warning: function `spawn_http_remote` is never used
+   --> benches/utils.rs:171:18
+    |
+171 |     pub async fn spawn_http_remote() -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_ipc` is never used
+   --> benches/utils.rs:175:18
+    |
+175 |     pub async fn spawn_ipc() -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^
+
+warning: function `spawn_ethers_reth` is never used
+   --> benches/utils.rs:190:18
+    |
+190 |     pub async fn spawn_ethers_reth() -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_http` is never used
+   --> benches/utils.rs:208:18
+    |
+208 |     pub async fn spawn_http(local: bool) -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^^
+
+warning: function `spawn_ipc_provider` is never used
+  --> benches/utils.rs:24:18
+   |
+24 |     pub async fn spawn_ipc_provider() -> Provider<Ipc> {
+   |                  ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: struct `Block` is never constructed
+  --> benches/utils.rs:30:16
+   |
+30 |     pub struct Block {
+   |                ^^^^^
+
+warning: associated function `new` is never used
+  --> benches/utils.rs:37:12
+   |
+36 |     impl Block {
+   |     ---------- associated function in this implementation
+37 |         fn new(block_number: u64, txs: Vec<TransactionRequest>, gas_used: u64) -> Self {
+   |            ^^^
+
+warning: function `into_tx_request` is never used
+  --> benches/utils.rs:42:8
+   |
+42 |     fn into_tx_request(tx: Transaction) -> TransactionRequest {
+   |        ^^^^^^^^^^^^^^^
+
+warning: function `get_block` is never used
+  --> benches/utils.rs:61:14
+   |
+61 |     async fn get_block(provider: &Provider<Ipc>, block_number: u64) -> Block {
+   |              ^^^^^^^^^
+
+warning: function `get_blocks` is never used
+  --> benches/utils.rs:68:18
+   |
+68 |     pub async fn get_blocks(
+   |                  ^^^^^^^^^^
+
+warning: function `spawn_with_config` is never used
+  --> benches/utils.rs:81:18
+   |
+81 |     pub async fn spawn_with_config(config: NodeConfig) -> Result<SpawnResult, Box<dyn Error>> {
+   |                  ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_http_local` is never used
+  --> benches/utils.rs:88:18
+   |
+88 |     pub async fn spawn_http_local(block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
+   |                  ^^^^^^^^^^^^^^^^
+
+warning: function `spawn_http_remote` is never used
+  --> benches/utils.rs:92:18
+   |
+92 |     pub async fn spawn_http_remote(block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
+   |                  ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_ipc` is never used
+  --> benches/utils.rs:96:18
+   |
+96 |     pub async fn spawn_ipc(fork_block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
+   |                  ^^^^^^^^^
+
+warning: function `spawn_ethers_reth` is never used
+   --> benches/utils.rs:112:18
+    |
+112 |     pub async fn spawn_ethers_reth(fork_block_number: u64) -> Result<SpawnResult, Box<dyn Error>> {
+    |                  ^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_http` is never used
+   --> benches/utils.rs:131:18
+    |
+131 |     pub async fn spawn_http(
+    |                  ^^^^^^^^^^
+
+warning: `anvil-benchmarks` (bench "anvil_block_mine_benchmarks") generated 7 warnings
+warning: `anvil-benchmarks` (bench "anvil_sys_shutdown_benchmarks") generated 13 warnings (1 duplicate)
+    Finished bench [optimized] target(s) in 1m 06s
+Benchmarking Sequential Simulation/Local_Http/Blocks 14,556,786 -> 14,556,795
+Benchmarking Sequential Simulation/Local_Http/Blocks 14,556,786 -> 14,556,795: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 4264.0s, or reduce sample count to 10.
+Benchmarking Sequential Simulation/Local_Http/Blocks 14,556,786 -> 14,556,795: Collecting 1000 samples in estimated 4264.0 s (1000 iterations)
+Benchmarking Sequential Simulation/Local_Http/Blocks 14,556,786 -> 14,556,795: Analyzing
+Sequential Simulation/Local_Http/Blocks 14,556,786 -> 14,556,795
+                        time:   [4.0868 s 4.1001 s 4.1137 s]
+                        change: [-1.4167% -0.9720% -0.5029%] (p = 0.00 < 0.05)
+                        Change within noise threshold.
+Benchmarking Sequential Simulation/Ipc/Blocks 14,556,786 -> 14,556,795
+Benchmarking Sequential Simulation/Ipc/Blocks 14,556,786 -> 14,556,795: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 3515.6s, or reduce sample count to 10.
+Benchmarking Sequential Simulation/Ipc/Blocks 14,556,786 -> 14,556,795: Collecting 1000 samples in estimated 3515.6 s (1000 iterations)
+Benchmarking Sequential Simulation/Ipc/Blocks 14,556,786 -> 14,556,795: Analyzing
+Sequential Simulation/Ipc/Blocks 14,556,786 -> 14,556,795
+                        time:   [3.3743 s 3.3852 s 3.3962 s]
+Benchmarking Sequential Simulation/ethers-reth/Blocks 14,556,786 -> 14,556,795
+Benchmarking Sequential Simulation/ethers-reth/Blocks 14,556,786 -> 14,556,795: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 1778.7s, or reduce sample count to 10.
+Benchmarking Sequential Simulation/ethers-reth/Blocks 14,556,786 -> 14,556,795: Collecting 1000 samples in estimated 1778.7 s (1000 iterations)
+Benchmarking Sequential Simulation/ethers-reth/Blocks 14,556,786 -> 14,556,795: Analyzing
+Sequential Simulation/ethers-reth/Blocks 14,556,786 -> 14,556,795
+                        time:   [1.7241 s 1.7294 s 1.7348 s]
+
+Benchmarking Individual Block Simulation/Local_Http/Block: 0, TotalGas: 30,312,275
+Benchmarking Individual Block Simulation/Local_Http/Block: 0, TotalGas: 30,312,275: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 787.8s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Local_Http/Block: 0, TotalGas: 30,312,275: Collecting 1000 samples in estimated 787.83 s (1000 iterations)
+Benchmarking Individual Block Simulation/Local_Http/Block: 0, TotalGas: 30,312,275: Analyzing
+Individual Block Simulation/Local_Http/Block: 0, TotalGas: 30,312,275
+                        time:   [797.15 ms 802.21 ms 807.56 ms]
+Benchmarking Individual Block Simulation/Local_Http/Block: 1, TotalGas: 26,490,097
+Benchmarking Individual Block Simulation/Local_Http/Block: 1, TotalGas: 26,490,097: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 766.4s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Local_Http/Block: 1, TotalGas: 26,490,097: Collecting 1000 samples in estimated 766.43 s (1000 iterations)
+Benchmarking Individual Block Simulation/Local_Http/Block: 1, TotalGas: 26,490,097: Analyzing
+Individual Block Simulation/Local_Http/Block: 1, TotalGas: 26,490,097
+                        time:   [724.08 ms 728.31 ms 732.74 ms]
+Benchmarking Individual Block Simulation/Local_Http/Block: 2, TotalGas: 1,973,605
+Benchmarking Individual Block Simulation/Local_Http/Block: 2, TotalGas: 1,973,605: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 100.1s, or reduce sample count to 40.
+Benchmarking Individual Block Simulation/Local_Http/Block: 2, TotalGas: 1,973,605: Collecting 1000 samples in estimated 100.11 s (1000 iterations)
+Benchmarking Individual Block Simulation/Local_Http/Block: 2, TotalGas: 1,973,605: Analyzing
+Individual Block Simulation/Local_Http/Block: 2, TotalGas: 1,973,605
+                        time:   [103.50 ms 105.19 ms 107.06 ms]
+Benchmarking Individual Block Simulation/Local_Http/Block: 3, TotalGas: 30,209,666
+Benchmarking Individual Block Simulation/Local_Http/Block: 3, TotalGas: 30,209,666: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 916.1s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Local_Http/Block: 3, TotalGas: 30,209,666: Collecting 1000 samples in estimated 916.11 s (1000 iterations)
+Benchmarking Individual Block Simulation/Local_Http/Block: 3, TotalGas: 30,209,666: Analyzing
+Individual Block Simulation/Local_Http/Block: 3, TotalGas: 30,209,666
+                        time:   [916.06 ms 920.93 ms 926.05 ms]
+Benchmarking Individual Block Simulation/Local_Http/Block: 4, TotalGas: 30,248,521
+Benchmarking Individual Block Simulation/Local_Http/Block: 4, TotalGas: 30,248,521: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 826.0s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Local_Http/Block: 4, TotalGas: 30,248,521: Collecting 1000 samples in estimated 825.99 s (1000 iterations)
+Benchmarking Individual Block Simulation/Local_Http/Block: 4, TotalGas: 30,248,521: Analyzing
+Individual Block Simulation/Local_Http/Block: 4, TotalGas: 30,248,521
+                        time:   [878.35 ms 883.31 ms 888.55 ms]
+Benchmarking Individual Block Simulation/Local_Http/Block: 5, TotalGas: 22,259,893
+Benchmarking Individual Block Simulation/Local_Http/Block: 5, TotalGas: 22,259,893: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 773.2s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Local_Http/Block: 5, TotalGas: 22,259,893: Collecting 1000 samples in estimated 773.22 s (1000 iterations)
+Benchmarking Individual Block Simulation/Local_Http/Block: 5, TotalGas: 22,259,893: Analyzing
+Individual Block Simulation/Local_Http/Block: 5, TotalGas: 22,259,893
+                        time:   [695.62 ms 700.30 ms 705.22 ms]
+Benchmarking Individual Block Simulation/Local_Http/Block: 6, TotalGas: 6,195,368
+Benchmarking Individual Block Simulation/Local_Http/Block: 6, TotalGas: 6,195,368: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 224.4s, or reduce sample count to 20.
+Benchmarking Individual Block Simulation/Local_Http/Block: 6, TotalGas: 6,195,368: Collecting 1000 samples in estimated 224.42 s (1000 iterations)
+Benchmarking Individual Block Simulation/Local_Http/Block: 6, TotalGas: 6,195,368: Analyzing
+Individual Block Simulation/Local_Http/Block: 6, TotalGas: 6,195,368
+                        time:   [217.46 ms 219.66 ms 222.07 ms]
+Benchmarking Individual Block Simulation/Local_Http/Block: 7, TotalGas: 4,067,167
+Benchmarking Individual Block Simulation/Local_Http/Block: 7, TotalGas: 4,067,167: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 180.3s, or reduce sample count to 20.
+Benchmarking Individual Block Simulation/Local_Http/Block: 7, TotalGas: 4,067,167: Collecting 1000 samples in estimated 180.26 s (1000 iterations)
+Benchmarking Individual Block Simulation/Local_Http/Block: 7, TotalGas: 4,067,167: Analyzing
+Individual Block Simulation/Local_Http/Block: 7, TotalGas: 4,067,167
+                        time:   [178.65 ms 180.92 ms 183.39 ms]
+Benchmarking Individual Block Simulation/Local_Http/Block: 8, TotalGas: 18,144,161
+Benchmarking Individual Block Simulation/Local_Http/Block: 8, TotalGas: 18,144,161: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 567.4s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Local_Http/Block: 8, TotalGas: 18,144,161: Collecting 1000 samples in estimated 567.45 s (1000 iterations)
+Benchmarking Individual Block Simulation/Local_Http/Block: 8, TotalGas: 18,144,161: Analyzing
+Individual Block Simulation/Local_Http/Block: 8, TotalGas: 18,144,161
+                        time:   [561.79 ms 565.45 ms 569.32 ms]
+Benchmarking Individual Block Simulation/Local_Http/Block: 9, TotalGas: 26,759,449
+Benchmarking Individual Block Simulation/Local_Http/Block: 9, TotalGas: 26,759,449: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 712.0s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Local_Http/Block: 9, TotalGas: 26,759,449: Collecting 1000 samples in estimated 711.95 s (1000 iterations)
+Benchmarking Individual Block Simulation/Local_Http/Block: 9, TotalGas: 26,759,449: Analyzing
+Individual Block Simulation/Local_Http/Block: 9, TotalGas: 26,759,449
+                        time:   [713.53 ms 718.40 ms 723.60 ms]
+Benchmarking Individual Block Simulation/Ipc/Block: 0, TotalGas: 30,312,275
+Benchmarking Individual Block Simulation/Ipc/Block: 0, TotalGas: 30,312,275: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 675.8s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Ipc/Block: 0, TotalGas: 30,312,275: Collecting 1000 samples in estimated 675.83 s (1000 iterations)
+Benchmarking Individual Block Simulation/Ipc/Block: 0, TotalGas: 30,312,275: Analyzing
+Individual Block Simulation/Ipc/Block: 0, TotalGas: 30,312,275
+                        time:   [667.26 ms 670.99 ms 674.86 ms]
+Benchmarking Individual Block Simulation/Ipc/Block: 1, TotalGas: 26,490,097
+Benchmarking Individual Block Simulation/Ipc/Block: 1, TotalGas: 26,490,097: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 588.7s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Ipc/Block: 1, TotalGas: 26,490,097: Collecting 1000 samples in estimated 588.70 s (1000 iterations)
+Benchmarking Individual Block Simulation/Ipc/Block: 1, TotalGas: 26,490,097: Analyzing
+Individual Block Simulation/Ipc/Block: 1, TotalGas: 26,490,097
+                        time:   [614.03 ms 617.74 ms 621.61 ms]
+Benchmarking Individual Block Simulation/Ipc/Block: 2, TotalGas: 1,973,605
+Benchmarking Individual Block Simulation/Ipc/Block: 2, TotalGas: 1,973,605: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 88.0s, or reduce sample count to 50.
+Benchmarking Individual Block Simulation/Ipc/Block: 2, TotalGas: 1,973,605: Collecting 1000 samples in estimated 88.002 s (1000 iterations)
+Benchmarking Individual Block Simulation/Ipc/Block: 2, TotalGas: 1,973,605: Analyzing
+Individual Block Simulation/Ipc/Block: 2, TotalGas: 1,973,605
+                        time:   [91.658 ms 92.999 ms 94.487 ms]
+Benchmarking Individual Block Simulation/Ipc/Block: 3, TotalGas: 30,209,666
+Benchmarking Individual Block Simulation/Ipc/Block: 3, TotalGas: 30,209,666: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 833.3s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Ipc/Block: 3, TotalGas: 30,209,666: Collecting 1000 samples in estimated 833.30 s (1000 iterations)
+Benchmarking Individual Block Simulation/Ipc/Block: 3, TotalGas: 30,209,666: Analyzing
+Individual Block Simulation/Ipc/Block: 3, TotalGas: 30,209,666
+                        time:   [772.73 ms 777.15 ms 781.69 ms]
+Benchmarking Individual Block Simulation/Ipc/Block: 4, TotalGas: 30,248,521
+Benchmarking Individual Block Simulation/Ipc/Block: 4, TotalGas: 30,248,521: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 707.6s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Ipc/Block: 4, TotalGas: 30,248,521: Collecting 1000 samples in estimated 707.59 s (1000 iterations)
+Benchmarking Individual Block Simulation/Ipc/Block: 4, TotalGas: 30,248,521: Analyzing
+Individual Block Simulation/Ipc/Block: 4, TotalGas: 30,248,521
+                        time:   [731.91 ms 735.84 ms 739.94 ms]
+Benchmarking Individual Block Simulation/Ipc/Block: 5, TotalGas: 22,259,893
+Benchmarking Individual Block Simulation/Ipc/Block: 5, TotalGas: 22,259,893: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 559.4s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Ipc/Block: 5, TotalGas: 22,259,893: Collecting 1000 samples in estimated 559.41 s (1000 iterations)
+Benchmarking Individual Block Simulation/Ipc/Block: 5, TotalGas: 22,259,893: Analyzing
+Individual Block Simulation/Ipc/Block: 5, TotalGas: 22,259,893
+                        time:   [578.22 ms 581.94 ms 585.85 ms]
+Benchmarking Individual Block Simulation/Ipc/Block: 6, TotalGas: 6,195,368
+Benchmarking Individual Block Simulation/Ipc/Block: 6, TotalGas: 6,195,368: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 201.8s, or reduce sample count to 20.
+Benchmarking Individual Block Simulation/Ipc/Block: 6, TotalGas: 6,195,368: Collecting 1000 samples in estimated 201.83 s (1000 iterations)
+Benchmarking Individual Block Simulation/Ipc/Block: 6, TotalGas: 6,195,368: Analyzing
+Individual Block Simulation/Ipc/Block: 6, TotalGas: 6,195,368
+                        time:   [187.63 ms 189.43 ms 191.36 ms]
+Benchmarking Individual Block Simulation/Ipc/Block: 7, TotalGas: 4,067,167
+Benchmarking Individual Block Simulation/Ipc/Block: 7, TotalGas: 4,067,167: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 145.9s, or reduce sample count to 30.
+Benchmarking Individual Block Simulation/Ipc/Block: 7, TotalGas: 4,067,167: Collecting 1000 samples in estimated 145.88 s (1000 iterations)
+Benchmarking Individual Block Simulation/Ipc/Block: 7, TotalGas: 4,067,167: Analyzing
+Individual Block Simulation/Ipc/Block: 7, TotalGas: 4,067,167
+                        time:   [153.63 ms 155.24 ms 157.00 ms]
+Benchmarking Individual Block Simulation/Ipc/Block: 8, TotalGas: 18,144,161
+Benchmarking Individual Block Simulation/Ipc/Block: 8, TotalGas: 18,144,161: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 510.0s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Ipc/Block: 8, TotalGas: 18,144,161: Collecting 1000 samples in estimated 510.01 s (1000 iterations)
+Benchmarking Individual Block Simulation/Ipc/Block: 8, TotalGas: 18,144,161: Analyzing
+Individual Block Simulation/Ipc/Block: 8, TotalGas: 18,144,161
+                        time:   [475.92 ms 478.88 ms 481.95 ms]
+Benchmarking Individual Block Simulation/Ipc/Block: 9, TotalGas: 26,759,449
+Benchmarking Individual Block Simulation/Ipc/Block: 9, TotalGas: 26,759,449: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 600.1s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/Ipc/Block: 9, TotalGas: 26,759,449: Collecting 1000 samples in estimated 600.07 s (1000 iterations)
+Benchmarking Individual Block Simulation/Ipc/Block: 9, TotalGas: 26,759,449: Analyzing
+Individual Block Simulation/Ipc/Block: 9, TotalGas: 26,759,449
+                        time:   [591.34 ms 594.82 ms 598.46 ms]
+Benchmarking Individual Block Simulation/ethers-reth/Block: 0, TotalGas: 30,312,275
+Benchmarking Individual Block Simulation/ethers-reth/Block: 0, TotalGas: 30,312,275: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 350.3s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/ethers-reth/Block: 0, TotalGas: 30,312,275: Collecting 1000 samples in estimated 350.31 s (1000 iterations)
+Benchmarking Individual Block Simulation/ethers-reth/Block: 0, TotalGas: 30,312,275: Analyzing
+Individual Block Simulation/ethers-reth/Block: 0, TotalGas: 30,312,275
+                        time:   [340.07 ms 342.05 ms 344.17 ms]
+Benchmarking Individual Block Simulation/ethers-reth/Block: 1, TotalGas: 26,490,097
+Benchmarking Individual Block Simulation/ethers-reth/Block: 1, TotalGas: 26,490,097: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 314.6s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/ethers-reth/Block: 1, TotalGas: 26,490,097: Collecting 1000 samples in estimated 314.60 s (1000 iterations)
+Benchmarking Individual Block Simulation/ethers-reth/Block: 1, TotalGas: 26,490,097: Analyzing
+Individual Block Simulation/ethers-reth/Block: 1, TotalGas: 26,490,097
+                        time:   [308.21 ms 310.55 ms 313.06 ms]
+Benchmarking Individual Block Simulation/ethers-reth/Block: 2, TotalGas: 1,973,605
+Benchmarking Individual Block Simulation/ethers-reth/Block: 2, TotalGas: 1,973,605: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 70.9s, or reduce sample count to 70.
+Benchmarking Individual Block Simulation/ethers-reth/Block: 2, TotalGas: 1,973,605: Collecting 1000 samples in estimated 70.856 s (1000 iterations)
+Benchmarking Individual Block Simulation/ethers-reth/Block: 2, TotalGas: 1,973,605: Analyzing
+Individual Block Simulation/ethers-reth/Block: 2, TotalGas: 1,973,605
+                        time:   [62.462 ms 63.510 ms 64.745 ms]
+Benchmarking Individual Block Simulation/ethers-reth/Block: 3, TotalGas: 30,209,666
+Benchmarking Individual Block Simulation/ethers-reth/Block: 3, TotalGas: 30,209,666: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 404.2s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/ethers-reth/Block: 3, TotalGas: 30,209,666: Collecting 1000 samples in estimated 404.21 s (1000 iterations)
+Benchmarking Individual Block Simulation/ethers-reth/Block: 3, TotalGas: 30,209,666: Analyzing
+Individual Block Simulation/ethers-reth/Block: 3, TotalGas: 30,209,666
+                        time:   [378.13 ms 380.73 ms 383.53 ms]
+Benchmarking Individual Block Simulation/ethers-reth/Block: 4, TotalGas: 30,248,521
+Benchmarking Individual Block Simulation/ethers-reth/Block: 4, TotalGas: 30,248,521: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 365.3s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/ethers-reth/Block: 4, TotalGas: 30,248,521: Collecting 1000 samples in estimated 365.25 s (1000 iterations)
+Benchmarking Individual Block Simulation/ethers-reth/Block: 4, TotalGas: 30,248,521: Analyzing
+Individual Block Simulation/ethers-reth/Block: 4, TotalGas: 30,248,521
+                        time:   [370.05 ms 372.69 ms 375.54 ms]
+Benchmarking Individual Block Simulation/ethers-reth/Block: 5, TotalGas: 22,259,893
+Benchmarking Individual Block Simulation/ethers-reth/Block: 5, TotalGas: 22,259,893: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 284.8s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/ethers-reth/Block: 5, TotalGas: 22,259,893: Collecting 1000 samples in estimated 284.76 s (1000 iterations)
+Benchmarking Individual Block Simulation/ethers-reth/Block: 5, TotalGas: 22,259,893: Analyzing
+Individual Block Simulation/ethers-reth/Block: 5, TotalGas: 22,259,893
+                        time:   [291.16 ms 293.28 ms 295.53 ms]
+Benchmarking Individual Block Simulation/ethers-reth/Block: 6, TotalGas: 6,195,368
+Benchmarking Individual Block Simulation/ethers-reth/Block: 6, TotalGas: 6,195,368: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 104.0s, or reduce sample count to 40.
+Benchmarking Individual Block Simulation/ethers-reth/Block: 6, TotalGas: 6,195,368: Collecting 1000 samples in estimated 103.97 s (1000 iterations)
+Benchmarking Individual Block Simulation/ethers-reth/Block: 6, TotalGas: 6,195,368: Analyzing
+Individual Block Simulation/ethers-reth/Block: 6, TotalGas: 6,195,368
+                        time:   [108.16 ms 109.54 ms 111.07 ms]
+Benchmarking Individual Block Simulation/ethers-reth/Block: 7, TotalGas: 4,067,167
+Benchmarking Individual Block Simulation/ethers-reth/Block: 7, TotalGas: 4,067,167: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 83.0s, or reduce sample count to 60.
+Benchmarking Individual Block Simulation/ethers-reth/Block: 7, TotalGas: 4,067,167: Collecting 1000 samples in estimated 82.976 s (1000 iterations)
+Benchmarking Individual Block Simulation/ethers-reth/Block: 7, TotalGas: 4,067,167: Analyzing
+Individual Block Simulation/ethers-reth/Block: 7, TotalGas: 4,067,167
+                        time:   [86.754 ms 88.213 ms 89.849 ms]
+Benchmarking Individual Block Simulation/ethers-reth/Block: 8, TotalGas: 18,144,161
+Benchmarking Individual Block Simulation/ethers-reth/Block: 8, TotalGas: 18,144,161: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 235.1s, or reduce sample count to 20.
+Benchmarking Individual Block Simulation/ethers-reth/Block: 8, TotalGas: 18,144,161: Collecting 1000 samples in estimated 235.11 s (1000 iterations)
+Benchmarking Individual Block Simulation/ethers-reth/Block: 8, TotalGas: 18,144,161: Analyzing
+Individual Block Simulation/ethers-reth/Block: 8, TotalGas: 18,144,161
+                        time:   [244.83 ms 246.88 ms 249.10 ms]
+Benchmarking Individual Block Simulation/ethers-reth/Block: 9, TotalGas: 26,759,449
+Benchmarking Individual Block Simulation/ethers-reth/Block: 9, TotalGas: 26,759,449: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 322.1s, or reduce sample count to 10.
+Benchmarking Individual Block Simulation/ethers-reth/Block: 9, TotalGas: 26,759,449: Collecting 1000 samples in estimated 322.11 s (1000 iterations)
+Benchmarking Individual Block Simulation/ethers-reth/Block: 9, TotalGas: 26,759,449: Analyzing
+Individual Block Simulation/ethers-reth/Block: 9, TotalGas: 26,759,449
+                        time:   [297.78 ms 299.91 ms 302.15 ms]
+
+Benchmarking Convex Finance System Shutdown/Local Http/System_shutdown
+Benchmarking Convex Finance System Shutdown/Local Http/System_shutdown: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 763.7s, or reduce sample count to 10.
+Benchmarking Convex Finance System Shutdown/Local Http/System_shutdown: Collecting 1000 samples in estimated 763.74 s (1000 iterations)
+Benchmarking Convex Finance System Shutdown/Local Http/System_shutdown: Analyzing
+Convex Finance System Shutdown/Local Http/System_shutdown
+                        time:   [800.32 ms 804.77 ms 809.41 ms]
+Benchmarking Convex Finance System Shutdown/Ipc/System_shutdown
+Benchmarking Convex Finance System Shutdown/Ipc/System_shutdown: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 593.3s, or reduce sample count to 10.
+Benchmarking Convex Finance System Shutdown/Ipc/System_shutdown: Collecting 1000 samples in estimated 593.35 s (1000 iterations)
+Benchmarking Convex Finance System Shutdown/Ipc/System_shutdown: Analyzing
+Convex Finance System Shutdown/Ipc/System_shutdown
+                        time:   [611.51 ms 615.53 ms 619.78 ms]
+Benchmarking Convex Finance System Shutdown/ethers-reth/System_shutdown
+Benchmarking Convex Finance System Shutdown/ethers-reth/System_shutdown: Warming up for 3.0000 s
+
+Warning: Unable to complete 1000 samples in 5.0s. You may wish to increase target time to 277.7s, or reduce sample count to 10.
+Benchmarking Convex Finance System Shutdown/ethers-reth/System_shutdown: Collecting 1000 samples in estimated 277.71 s (1000 iterations)
+Benchmarking Convex Finance System Shutdown/ethers-reth/System_shutdown: Analyzing
+Convex Finance System Shutdown/ethers-reth/System_shutdown
+                        time:   [288.73 ms 291.17 ms 293.79 ms]
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
