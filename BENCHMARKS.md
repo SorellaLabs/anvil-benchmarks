@@ -4,39 +4,37 @@
 
 - [Benchmark Results](#benchmark-results)
     - [Individual Block Simulation](#individual-block-simulation)
-    - [All Blocks Simulation](#all-blocks-simulation)
-    - [Anvil](#anvil)
+    - [Sequential Simulation](#sequential-simulation)
+    - [Convex Finance System Shutdown](#convex-finance-system-shutdown)
 
 ## Benchmark Results
 
 ### Individual Block Simulation
 
-|               | `Local_Http`              | `Ipc`                            | `ethers_reth_middleware`           |
-|:--------------|:--------------------------|:---------------------------------|:---------------------------------- |
-| **`Block_0`** | `865.39 ms` (✅ **1.00x**) | `718.26 ms` (✅ **1.20x faster**) | `379.62 ms` (🚀 **2.28x faster**)   |
-| **`Block_1`** | `1.08 s` (✅ **1.00x**)    | `784.32 ms` (✅ **1.38x faster**) | `442.19 ms` (🚀 **2.45x faster**)   |
-| **`Block_2`** | `171.94 ms` (✅ **1.00x**) | `101.67 ms` (✅ **1.69x faster**) | `88.16 ms` (🚀 **1.95x faster**)    |
-| **`Block_3`** | `1.29 s` (✅ **1.00x**)    | `884.06 ms` (✅ **1.46x faster**) | `428.43 ms` (🚀 **3.02x faster**)   |
-| **`Block_4`** | `1.25 s` (✅ **1.00x**)    | `751.57 ms` (✅ **1.67x faster**) | `497.72 ms` (🚀 **2.52x faster**)   |
-| **`Block_5`** | `909.17 ms` (✅ **1.00x**) | `683.53 ms` (✅ **1.33x faster**) | `404.78 ms` (🚀 **2.25x faster**)   |
-| **`Block_6`** | `351.57 ms` (✅ **1.00x**) | `243.60 ms` (✅ **1.44x faster**) | `151.00 ms` (🚀 **2.33x faster**)   |
-| **`Block_7`** | `271.05 ms` (✅ **1.00x**) | `212.41 ms` (✅ **1.28x faster**) | `87.22 ms` (🚀 **3.11x faster**)    |
-| **`Block_8`** | `891.00 ms` (✅ **1.00x**) | `583.21 ms` (✅ **1.53x faster**) | `315.54 ms` (🚀 **2.82x faster**)   |
-| **`Block_9`** | `1.03 s` (✅ **1.00x**)    | `729.32 ms` (✅ **1.41x faster**) | `381.21 ms` (🚀 **2.70x faster**)   |
+|                                   | `Local_Http`              | `Ipc`                            | `ethers_reth_middleware`           |
+|:----------------------------------|:--------------------------|:---------------------------------|:---------------------------------- |
+| **`Block_0, TotalGas: 30312275`** | `871.76 ms` (✅ **1.00x**) | `652.35 ms` (✅ **1.34x faster**) | `324.39 ms` (🚀 **2.69x faster**)   |
+| **`Block_1, TotalGas: 26490097`** | `800.90 ms` (✅ **1.00x**) | `591.18 ms` (✅ **1.35x faster**) | `308.54 ms` (🚀 **2.60x faster**)   |
+| **`Block_2, TotalGas: 1973605`**  | `120.78 ms` (✅ **1.00x**) | `86.20 ms` (✅ **1.40x faster**)  | `66.54 ms` (🚀 **1.82x faster**)    |
+| **`Block_3, TotalGas: 30209666`** | `1.03 s` (✅ **1.00x**)    | `726.08 ms` (✅ **1.42x faster**) | `355.66 ms` (🚀 **2.91x faster**)   |
+| **`Block_4, TotalGas: 30248521`** | `937.77 ms` (✅ **1.00x**) | `699.15 ms` (✅ **1.34x faster**) | `368.94 ms` (🚀 **2.54x faster**)   |
+| **`Block_5, TotalGas: 22259893`** | `797.52 ms` (✅ **1.00x**) | `577.81 ms` (✅ **1.38x faster**) | `290.35 ms` (🚀 **2.75x faster**)   |
+| **`Block_6, TotalGas: 6195368`**  | `243.80 ms` (✅ **1.00x**) | `174.11 ms` (✅ **1.40x faster**) | `110.93 ms` (🚀 **2.20x faster**)   |
+| **`Block_7, TotalGas: 4067167`**  | `189.87 ms` (✅ **1.00x**) | `151.81 ms` (✅ **1.25x faster**) | `82.89 ms` (🚀 **2.29x faster**)    |
+| **`Block_8, TotalGas: 18144161`** | `598.58 ms` (✅ **1.00x**) | `461.63 ms` (✅ **1.30x faster**) | `230.97 ms` (🚀 **2.59x faster**)   |
+| **`Block_9, TotalGas: 26759449`** | `802.54 ms` (✅ **1.00x**) | `562.46 ms` (✅ **1.43x faster**) | `280.25 ms` (🚀 **2.86x faster**)   |
 
-### All Blocks Simulation
+### Sequential Simulation
 
-|                              | `All_blocks`            |
-|:-----------------------------|:----------------------- |
-| **`Local_Http`**             | `5.47 s` (✅ **1.00x**)  |
-| **`Ipc`**                    | `3.79 s` (✅ **1.00x**)  |
-| **`ethers_reth_middleware`** | `2.06 s` (✅ **1.00x**)  |
+|                                   | `Local_Http`           | `Ipc`                         | `ethers_reth_middleware`           |
+|:----------------------------------|:-----------------------|:------------------------------|:---------------------------------- |
+| **`Blocks 14556786 -> 14556795`** | `4.57 s` (✅ **1.00x**) | `3.25 s` (✅ **1.41x faster**) | `1.69 s` (🚀 **2.71x faster**)      |
 
-### Anvil
+### Convex Finance System Shutdown
 
-|                       | `Local Http`           | `Ipc`                            | `ethers-reth`                     |
-|:----------------------|:-----------------------|:---------------------------------|:--------------------------------- |
-| **`System_shutdown`** | `1.16 s` (✅ **1.00x**) | `725.84 ms` (✅ **1.60x faster**) | `396.10 ms` (🚀 **2.93x faster**)  |
+|                       | `Local Http`              | `Ipc`                            | `ethers-reth`                     |
+|:----------------------|:--------------------------|:---------------------------------|:--------------------------------- |
+| **`System_shutdown`** | `880.52 ms` (✅ **1.00x**) | `644.62 ms` (✅ **1.37x faster**) | `291.73 ms` (🚀 **3.02x faster**)  |
 
 ---
 Made with [criterion-table](https://github.com/nu11ptr/criterion-table)
