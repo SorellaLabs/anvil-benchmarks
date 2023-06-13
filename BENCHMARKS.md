@@ -3,34 +3,40 @@
 ## Table of Contents
 
 - [Benchmark Results](#benchmark-results)
-    - [Block Simulation](#block-simulation)
+    - [Individual Block Simulation](#individual-block-simulation)
+    - [All Blocks Simulation](#all-blocks-simulation)
     - [Anvil](#anvil)
 
 ## Benchmark Results
 
-### Block Simulation
+### Individual Block Simulation
 
-|                              | `Local_Http`              | `Ipc`                            | `ethers_reth_middleware`          | `All_blocks`            |
-|:-----------------------------|:--------------------------|:---------------------------------|:----------------------------------|:----------------------- |
-| **`Local_Http`**             | `N/A`                     | `N/A`                            | `N/A`                             | `5.34 s` (✅ **1.00x**)  |
-| **`Block_0`**                | `1.08 s` (✅ **1.00x**)    | `789.75 ms` (✅ **1.37x faster**) | `408.03 ms` (🚀 **2.64x faster**)  | `N/A`                   |
-| **`Block_1`**                | `942.26 ms` (✅ **1.00x**) | `724.89 ms` (✅ **1.30x faster**) | `350.74 ms` (🚀 **2.69x faster**)  | `N/A`                   |
-| **`Block_2`**                | `163.18 ms` (✅ **1.00x**) | `123.01 ms` (✅ **1.33x faster**) | `59.83 ms` (🚀 **2.73x faster**)   | `N/A`                   |
-| **`Block_3`**                | `1.29 s` (✅ **1.00x**)    | `865.22 ms` (✅ **1.49x faster**) | `493.79 ms` (🚀 **2.61x faster**)  | `N/A`                   |
-| **`Block_4`**                | `1.24 s` (✅ **1.00x**)    | `857.00 ms` (✅ **1.45x faster**) | `443.70 ms` (🚀 **2.79x faster**)  | `N/A`                   |
-| **`Block_5`**                | `866.88 ms` (✅ **1.00x**) | `765.65 ms` (✅ **1.13x faster**) | `427.86 ms` (🚀 **2.03x faster**)  | `N/A`                   |
-| **`Block_6`**                | `375.48 ms` (✅ **1.00x**) | `241.81 ms` (✅ **1.55x faster**) | `117.91 ms` (🚀 **3.18x faster**)  | `N/A`                   |
-| **`Block_7`**                | `257.22 ms` (✅ **1.00x**) | `202.51 ms` (✅ **1.27x faster**) | `121.65 ms` (🚀 **2.11x faster**)  | `N/A`                   |
-| **`Block_8`**                | `770.41 ms` (✅ **1.00x**) | `604.47 ms` (✅ **1.27x faster**) | `310.30 ms` (🚀 **2.48x faster**)  | `N/A`                   |
-| **`Block_9`**                | `873.47 ms` (✅ **1.00x**) | `745.34 ms` (✅ **1.17x faster**) | `373.83 ms` (🚀 **2.34x faster**)  | `N/A`                   |
-| **`Ipc`**                    | `N/A`                     | `N/A`                            | `N/A`                             | `3.71 s` (✅ **1.00x**)  |
-| **`ethers_reth_middleware`** | `N/A`                     | `N/A`                            | `N/A`                             | `1.99 s` (✅ **1.00x**)  |
+|               | `Local_Http`              | `Ipc`                            | `ethers_reth_middleware`           |
+|:--------------|:--------------------------|:---------------------------------|:---------------------------------- |
+| **`Block_0`** | `865.39 ms` (✅ **1.00x**) | `718.26 ms` (✅ **1.20x faster**) | `379.62 ms` (🚀 **2.28x faster**)   |
+| **`Block_1`** | `1.08 s` (✅ **1.00x**)    | `784.32 ms` (✅ **1.38x faster**) | `442.19 ms` (🚀 **2.45x faster**)   |
+| **`Block_2`** | `171.94 ms` (✅ **1.00x**) | `101.67 ms` (✅ **1.69x faster**) | `88.16 ms` (🚀 **1.95x faster**)    |
+| **`Block_3`** | `1.29 s` (✅ **1.00x**)    | `884.06 ms` (✅ **1.46x faster**) | `428.43 ms` (🚀 **3.02x faster**)   |
+| **`Block_4`** | `1.25 s` (✅ **1.00x**)    | `751.57 ms` (✅ **1.67x faster**) | `497.72 ms` (🚀 **2.52x faster**)   |
+| **`Block_5`** | `909.17 ms` (✅ **1.00x**) | `683.53 ms` (✅ **1.33x faster**) | `404.78 ms` (🚀 **2.25x faster**)   |
+| **`Block_6`** | `351.57 ms` (✅ **1.00x**) | `243.60 ms` (✅ **1.44x faster**) | `151.00 ms` (🚀 **2.33x faster**)   |
+| **`Block_7`** | `271.05 ms` (✅ **1.00x**) | `212.41 ms` (✅ **1.28x faster**) | `87.22 ms` (🚀 **3.11x faster**)    |
+| **`Block_8`** | `891.00 ms` (✅ **1.00x**) | `583.21 ms` (✅ **1.53x faster**) | `315.54 ms` (🚀 **2.82x faster**)   |
+| **`Block_9`** | `1.03 s` (✅ **1.00x**)    | `729.32 ms` (✅ **1.41x faster**) | `381.21 ms` (🚀 **2.70x faster**)   |
+
+### All Blocks Simulation
+
+|                              | `All_blocks`            |
+|:-----------------------------|:----------------------- |
+| **`Local_Http`**             | `5.47 s` (✅ **1.00x**)  |
+| **`Ipc`**                    | `3.79 s` (✅ **1.00x**)  |
+| **`ethers_reth_middleware`** | `2.06 s` (✅ **1.00x**)  |
 
 ### Anvil
 
 |                       | `Local Http`           | `Ipc`                            | `ethers-reth`                     |
 |:----------------------|:-----------------------|:---------------------------------|:--------------------------------- |
-| **`System_shutdown`** | `1.07 s` (✅ **1.00x**) | `767.80 ms` (✅ **1.40x faster**) | `380.97 ms` (🚀 **2.82x faster**)  |
+| **`System_shutdown`** | `1.16 s` (✅ **1.00x**) | `725.84 ms` (✅ **1.60x faster**) | `396.10 ms` (🚀 **2.93x faster**)  |
 
 ---
 Made with [criterion-table](https://github.com/nu11ptr/criterion-table)
