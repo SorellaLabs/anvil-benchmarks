@@ -131,7 +131,8 @@ source .env
 ```
 
 3. Run the benchmarks:
-   Prior to initiating the benchmarks, it's advised to reduce the sample size. With the current setting, each benchmark is executed 1000 times, which can significantly prolong the completion time.
+
+Prior to initiating the benchmarks, it's advised to reduce the sample size. With the current setting, each benchmark is executed 1000 times, which can significantly prolong the completion time.
    To run all benchmarks & generate a report in the BENCHMARSK.md file:
 
 ```
