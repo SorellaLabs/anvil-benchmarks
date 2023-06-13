@@ -21,6 +21,8 @@ num-traits = "0.2.15"
 lazy_static = "1.4.0"
 hex = "0.4.3"
 csv = "1.2.2"
+num-format = "0.4.4"
+
 
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["async_tokio","html_reports"] }

@@ -2,7 +2,7 @@ use std::{error::Error, pin::Pin};
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use tokio::{macros::support::Future, runtime::Runtime};
-
+use num_format::{Locale, ToFormattedString};
 // Local
 use anvil::eth::EthApi;
 mod utils;
@@ -52,7 +52,7 @@ pub fn benchmarks(c: &mut Criterion) {
                 group.sample_size(10).bench_with_input(
                     BenchmarkId::new(
                         *description,
-                        format!("Block_{}, TotalGas: {}", i, block.gas_used),
+                        format!("Block: {}, TotalGas: {}", i.to_formatted_string(&Locale::en), block.gas_used.to_formatted_string(&Locale::en)),
                     ),
                     block,
                     |b, block| {
@@ -80,7 +80,7 @@ pub fn benchmarks(c: &mut Criterion) {
 
         for (spawn_func, description) in &spawn_funcs {
             group.sample_size(10).bench_function(
-                BenchmarkId::new(*description, "Blocks 14556786 -> 14556795"),
+                BenchmarkId::new(*description, "Blocks 14,556,786 -> 14,556,795"),
                 |b| {
                     b.iter(|| {
                         let rt = Runtime::new().unwrap();

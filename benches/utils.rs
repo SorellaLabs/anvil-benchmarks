@@ -30,11 +30,11 @@ pub mod block_simulation {
     pub struct Block {
         pub block_number: u64,
         pub txs: Vec<TransactionRequest>,
-        pub gas_used: U256,
+        pub gas_used: u64,
     }
 
     impl Block {
-        fn new(block_number: u64, txs: Vec<TransactionRequest>, gas_used: U256) -> Self {
+        fn new(block_number: u64, txs: Vec<TransactionRequest>, gas_used: u64) -> Self {
             Self { block_number, txs, gas_used }
         }
     }
@@ -62,7 +62,7 @@ pub mod block_simulation {
         let block = provider.get_block_with_txs(block_number).await.unwrap().unwrap();
         let txs: Vec<TransactionRequest> =
             block.transactions.into_iter().map(into_tx_request).collect::<Vec<_>>();
-        Block::new(block_number, txs, block.gas_used) // pass the gas_used field here
+        Block::new(block_number, txs, block.gas_used.low_u64()) // pass the gas_used field here
     }
 
     pub async fn get_blocks(
