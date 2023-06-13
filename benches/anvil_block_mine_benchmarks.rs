@@ -41,7 +41,7 @@ pub fn benchmarks(c: &mut Criterion) {
     let provider = rt.block_on(spawn_ipc_provider());
     let blocks = rt.block_on(get_blocks(provider, START_BLOCK, END_BLOCK));
 
-    // Individual block benchmarks
+    // Single Block Simulation Benchmarking
     {
         let mut group = c.benchmark_group("Individual Block Simulation");
 
@@ -71,13 +71,13 @@ pub fn benchmarks(c: &mut Criterion) {
         group.finish();
     }
 
-    // All blocks benchmark
+    // Sequential Block Simulation
     {
-        let mut group = c.benchmark_group("All Blocks Simulation");
+        let mut group = c.benchmark_group("All Blocks Sequential Simulation");
 
         for (spawn_func, description) in &spawn_funcs {
             group.sample_size(10).bench_function(
-                BenchmarkId::new("All_blocks", description),
+                BenchmarkId::new(*description, "All_blocks"),
                 |b| {
                     b.iter(|| {
                         let rt = Runtime::new().unwrap();
