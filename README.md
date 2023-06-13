@@ -129,7 +129,7 @@ source .env
 ```
 
 3. Run the benchmarks:
-
+Before running the benchmarks I would recommend lowering the sample size as these benchmarks are all run 1000 times.
 To run all benchmarks & generate a report in the BENCHMARSK.md file:
 
 ```
