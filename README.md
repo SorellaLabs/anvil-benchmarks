@@ -6,7 +6,7 @@ This repository benchmarks Anvil providers by running Ethereum block simulations
 
 ## Background
 
-The Ipc and Ethers Reth middleware functionality has been developed by Sorella Labs for our back-testing needs. Our hope is to contribute these developments to foundry in the near future.
+The Ipc and Ethers Reth middleware functionality has been developed by Sorella Labs for our back-testing needs. Our hope is to contribute these developments to Foundry in the near future.
 
 ## Benchmarks
 
@@ -14,7 +14,7 @@ The repository contains the following benchmarks:
 
 1. **Convex Finance System Shutdown Simulation**: This benchmark simulates the system shutdown of the Convex Finance protocol.
 
-2. **Block Simulation Benchmark**: This benchmark replicates the execution of high gas Ethereum blocks as both a standalone block simulation & sequence block simulation.
+2. **Block Simulation Benchmark**: This benchmark replicates the execution of high-gas Ethereum blocks as both a standalone block simulation & sequence block simulation.
 
 ## Methodology
 
@@ -131,7 +131,7 @@ source .env
 ```
 
 3. Run the benchmarks:
-   Before running the benchmarks I would recommend lowering the sample size as these benchmarks are all run 1000 times.
+   Prior to initiating the benchmarks, it's advised to reduce the sample size. With the current setting, each benchmark is executed 1000 times, which can significantly prolong the completion time.
    To run all benchmarks & generate a report in the BENCHMARSK.md file:
 
 ```
